@@ -6,135 +6,155 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Mis Horas">
+    <link rel="apple-touch-icon" href="icono.png">
     <title>Mis Horas McD</title>
     <style>
         :root {
-            --bg-color: #f2f2f7; 
+            --bg-color: #f2f2f7; /* Fondo Apple nativo */
             --text-color: #1c1c1e;
+            --secondary-text: #8e8e93;
             --mcd-red: #da291c;
             --mcd-yellow: #ffc72c;
             --success: #34c759; 
             --card-bg: #ffffff;
             --holiday-color: #ff3b30;
+            --divider: #e5e5ea;
         }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 40px; }
-        header { text-align: center; margin-bottom: 20px; margin-top: 20px; width: 100%; max-width: 350px; }
-        h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
-        .status-text { font-size: 15px; color: #8e8e93; margin-top: 5px; }
         
-        .card { background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); width: 100%; max-width: 350px; text-align: center; margin-bottom: 20px; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif; }
         
-        .btn { border: none; padding: 16px 30px; border-radius: 14px; font-size: 17px; font-weight: 600; width: 100%; margin-bottom: 15px; cursor: pointer; transition: all 0.2s ease; }
-        .btn:active { transform: scale(0.96); }
-        .btn-in { background-color: var(--success); color: white; box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3); }
-        .btn-out { background-color: var(--mcd-red); color: white; display: none; box-shadow: 0 4px 10px rgba(218, 41, 28, 0.3); }
-        
-        .stats { display: flex; justify-content: space-between; margin-top: 10px; border-top: 1px solid #e5e5ea; padding-top: 15px;}
-        .stat-box { text-align: center; width: 48%; }
-        .stat-value { font-size: 24px; font-weight: 700; color: var(--text-color); }
-        .stat-label { font-size: 12px; color: #8e8e93; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Calendario Ampliado y Mejorado */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-header h3 { margin: 0; font-size: 18px; font-weight: 600; text-transform: capitalize; }
-        .calendar-nav { background: none; border: none; font-size: 18px; color: var(--mcd-red); font-weight: bold; cursor: pointer; padding: 5px 10px; }
-        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #8e8e93; font-weight: 600; margin-bottom: 10px; }
-        
-        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .day { 
-            min-height: 60px; /* Hace el calendario más grande */
-            background-color: #f9f9f9; 
-            border-radius: 8px; 
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 16px; 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-start; 
             align-items: center; 
-            padding: 4px; 
-            position: relative; 
-            cursor: pointer;
-            border: 1px solid #f0f0f0;
+            min-height: 100vh; 
+            padding-bottom: 60px; 
         }
-        .day-number { font-size: 14px; font-weight: 600; color: var(--text-color); margin-bottom: 2px;}
+
+        /* --- HEADER Y LOGO --- */
+        header { text-align: center; margin-bottom: 15px; margin-top: 25px; width: 100%; max-width: 380px; }
+        .logo-svg { width: 65px; height: auto; margin-bottom: 5px; }
+        .status-text { font-size: 15px; color: var(--secondary-text); margin-top: 5px; font-weight: 500;}
+
+        /* --- ESTRUCTURA TIPO APP (SECCIONES) --- */
+        .section-title { 
+            font-size: 13px; 
+            font-weight: 600; 
+            color: var(--secondary-text); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            width: 100%; 
+            max-width: 380px; 
+            text-align: left; 
+            margin: 20px 0 8px 10px; 
+        }
+        
+        .card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 14px rgba(0,0,0,0.03); 
+            width: 100%; 
+            max-width: 380px; 
+            margin-bottom: 10px; 
+        }
+
+        /* --- BOTONES DE FICHAJE --- */
+        .fichaje-container { text-align: center; }
+        #statusMessage { margin-bottom: 20px; font-size: 16px; font-weight: 600; }
+        .btn { border: none; padding: 18px 20px; border-radius: 16px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; transition: transform 0.1s ease; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn:active { transform: scale(0.96); }
+        .btn-in { background-color: var(--success); color: white; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2); }
+        .btn-out { background-color: var(--mcd-red); color: white; display: none; box-shadow: 0 4px 12px rgba(218, 41, 28, 0.2); }
+
+        /* --- RESUMEN QUINCENAL (NUEVA SECCIÓN) --- */
+        .resumen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+        .resumen-item { display: flex; flex-direction: column; justify-content: center; }
+        .r-value { font-size: 20px; font-weight: 800; color: var(--text-color); margin-bottom: 2px;}
+        .r-label { font-size: 11px; color: var(--secondary-text); font-weight: 600; text-transform: uppercase; }
+        .r-divider { width: 1px; background-color: var(--divider); height: 80%; margin: auto 0; }
+
+        /* --- CARGA MANUAL --- */
+        .manual-row { display: flex; gap: 12px; margin-bottom: 15px; }
+        .manual-col { flex: 1; }
+        .man-input { width: 100%; padding: 14px; margin-top: 6px; border: 1px solid var(--divider); border-radius: 12px; font-size: 15px; background: #fafafa; color: var(--text-color); font-weight: 500;}
+
+        /* --- CALENDARIO (Mantuvo tus medidas y estilos) --- */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .calendar-header h3 { margin: 0; font-size: 18px; font-weight: 700; text-transform: capitalize; }
+        .calendar-nav { background: #f2f2f7; border-radius: 50%; border: none; width: 32px; height: 32px; font-size: 16px; color: var(--mcd-red); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;}
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; color: var(--secondary-text); font-weight: 600; margin-bottom: 10px; }
+        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { min-height: 60px; background-color: #f9f9f9; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 4px; position: relative; cursor: pointer; border: 1px solid #f0f0f0; }
+        .day-number { font-size: 15px; font-weight: 600; color: var(--text-color); margin-bottom: 2px;}
         .day.today { border: 2px solid var(--mcd-red); background-color: #fffafa; }
         .day.today .day-number { color: var(--mcd-red); }
         .day.holiday .day-number { color: var(--holiday-color); }
         .day.empty { background: transparent; border: none; pointer-events: none; }
-        .day-hours-badge { 
-            font-size: 11px; 
-            color: white; 
-            font-weight: 700; 
-            background: var(--success); 
-            padding: 2px 0; 
-            border-radius: 4px; 
-            width: 100%; 
-            text-align: center;
-            margin-top: auto;
-        }
+        .day-hours-badge { font-size: 11px; color: white; font-weight: 700; background: var(--success); padding: 2px 0; border-radius: 4px; width: 100%; text-align: center; margin-top: auto; }
 
-        .section-title { font-size: 18px; font-weight: 600; width: 100%; max-width: 350px; text-align: left; margin: 10px 0; padding-left: 5px; }
-        #logList { list-style: none; padding: 0; margin: 0; width: 100%; max-width: 350px; text-align: left; }
-        #logList li { background: var(--card-bg); padding: 15px; margin-bottom: 10px; border-radius: 14px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .log-date { font-weight: 600; color: var(--text-color); }
-        .log-time { font-size: 13px; color: #8e8e93; margin-top: 3px; }
-        .log-hours { font-weight: 700; color: var(--success); font-size: 16px; background: rgba(52,199,89,0.1); padding: 5px 10px; border-radius: 8px; }
+        /* --- ÚLTIMOS TURNOS (AHORA CON BOTÓN ELIMINAR) --- */
+        .list-card { padding: 0; overflow: hidden;}
+        #logList { list-style: none; padding: 0; margin: 0; width: 100%; }
+        #logList li { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--divider); background: var(--card-bg);}
+        #logList li:last-child { border-bottom: none; }
+        .log-info { flex: 1; }
+        .log-date { font-weight: 600; color: var(--text-color); font-size: 15px; text-transform: capitalize;}
+        .log-time { font-size: 13px; color: var(--secondary-text); margin-top: 4px; }
         .log-holiday { font-size: 11px; color: var(--holiday-color); font-weight: 600; text-transform: uppercase; margin-top: 2px;}
+        .log-actions { display: flex; align-items: center; gap: 15px; }
+        .log-hours { font-weight: 700; color: var(--success); font-size: 16px; }
+        .btn-delete-list { background: #ffeeed; color: var(--mcd-red); border: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: 12px; cursor: pointer; }
 
-        .man-input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 15px; background: #f9f9f9; color: var(--text-color); }
-        
-        /* Modal (Ventana Emergente para gestionar días) */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; backdrop-filter: blur(3px); }
-        .modal-content { background-color: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; position: relative; max-height: 80vh; overflow-y: auto; }
-        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 24px; font-weight: bold; color: #8e8e93; cursor: pointer; }
-        .modal-title { margin-top: 0; font-size: 20px; margin-bottom: 15px; color: var(--text-color); border-bottom: 1px solid #eee; padding-bottom: 10px;}
-        .shift-item-modal { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
-        .btn-delete { background: var(--mcd-red); color: white; border: none; border-radius: 8px; padding: 6px 12px; font-weight: bold; cursor: pointer; }
+        /* --- MODAL (Intacto) --- */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .modal-content { background-color: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 350px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 26px; font-weight: 500; color: var(--secondary-text); cursor: pointer; }
+        .modal-title { margin-top: 0; font-size: 20px; margin-bottom: 15px; color: var(--text-color); border-bottom: 1px solid var(--divider); padding-bottom: 15px; font-weight: 700;}
+        .shift-item-modal { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .btn-delete { background: var(--mcd-red); color: white; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Mis Horas</h1>
-        <p class="status-text" id="currentQuincenaLabel">Quincena actual</p>
+        <svg class="logo-svg" viewBox="0 0 108 96" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#ffc72c" d="M12,93 l-12,0 c0,-43.5 16.9,-62.5 29,-62.5 c9.1,0 15.8,8.4 20.6,23.1 c5.4,-15.3 12.7,-23.1 22.2,-23.1 c12.1,0 29,19 29,62.5 l-11.8,0 c0,-33.9 -10.5,-48.9 -17.2,-48.9 c-7.2,0 -14.8,15.9 -14.8,48.9 l-11.9,0 c0,-33 -7.6,-48.9 -14.8,-48.9 c-6.7,0 -18.4,15 -18.4,48.9 z"/>
+        </svg>
     </header>
 
+    <div class="card fichaje-container">
+        <p class="status-text" id="statusMessage">No estás trabajando</p>
+        <button class="btn btn-in" id="btnIn" onclick="clockIn()">Marcar Entrada</button>
+        <button class="btn btn-out" id="btnOut" onclick="clockOut()">Marcar Salida</button>
+    </div>
+
+    <div class="section-title">Resumen Quincenal</div>
     <div class="card">
-        <p class="status-text" id="statusMessage" style="margin-bottom: 15px; font-weight: 500;">No estás trabajando</p>
-        <button class="btn btn-in" id="btnIn" onclick="clockIn()">Entrada</button>
-        <button class="btn btn-out" id="btnOut" onclick="clockOut()">Salida</button>
-
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-value" id="totalHours">0.0</div>
-                <div class="stat-label">Horas (Quinc.)</div>
+        <div class="resumen-grid">
+            <div class="resumen-item">
+                <div class="r-value" id="r-periodo">--</div>
+                <div class="r-label">Periodo</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-value" id="totalShifts">0</div>
-                <div class="stat-label">Turnos</div>
+            <div class="r-divider"></div>
+            <div class="resumen-item">
+                <div class="r-value" id="totalHours">0.0</div>
+                <div class="r-label">Horas</div>
+            </div>
+            <div class="r-divider"></div>
+            <div class="resumen-item">
+                <div class="r-value" id="totalShifts">0</div>
+                <div class="r-label">Turnos</div>
             </div>
         </div>
     </div>
 
-    <div class="section-title">Carga Manual</div>
-    <div class="card" style="text-align: left; padding-bottom: 15px;">
-        <div style="margin-bottom: 15px;">
-            <label class="stat-label">Fecha del Turno</label>
-            <input type="date" id="manDate" class="man-input">
-        </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label class="stat-label">Ingreso</label>
-                <input type="time" id="manIn" class="man-input">
-            </div>
-            <div style="flex: 1;">
-                <label class="stat-label">Salida</label>
-                <input type="time" id="manOut" class="man-input">
-            </div>
-        </div>
-        <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 15px;" onclick="addManualShift()">Guardar Turno Manual</button>
-    </div>
-
-    <div class="card" style="padding-bottom: 15px;">
+    <div class="section-title">Calendario</div>
+    <div class="card">
         <div class="calendar-header">
             <button class="calendar-nav" onclick="changeMonth(-1)">❮</button>
             <h3 id="monthYear">Mes Año</h3>
@@ -144,33 +164,54 @@
             <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div>
         </div>
         <div class="days" id="calendarDays"></div>
-        <p style="font-size: 12px; color: #8e8e93; margin-top: 15px; margin-bottom: 0;">* Tocá cualquier día para editar, agregar o eliminar turnos.</p>
+        <p style="font-size: 12px; color: var(--secondary-text); margin-top: 15px; margin-bottom: 0; text-align: center;">* Tocá un día para gestionar turnos específicos.</p>
     </div>
 
     <div class="section-title">Últimos Turnos</div>
-    <ul id="logList"></ul>
+    <div class="card list-card">
+        <ul id="logList">
+            </ul>
+    </div>
+
+    <div class="section-title">Carga Manual</div>
+    <div class="card">
+        <div style="margin-bottom: 10px;">
+            <label class="r-label">Fecha del Turno</label>
+            <input type="date" id="manDate" class="man-input">
+        </div>
+        <div class="manual-row">
+            <div class="manual-col">
+                <label class="r-label">Ingreso</label>
+                <input type="time" id="manIn" class="man-input">
+            </div>
+            <div class="manual-col">
+                <label class="r-label">Salida</label>
+                <input type="time" id="manOut" class="man-input">
+            </div>
+        </div>
+        <button class="btn btn-in" style="margin-bottom: 0; padding: 14px; font-size: 15px; background: var(--text-color);" onclick="addManualShift()">Guardar Turno</button>
+    </div>
 
     <div id="dayModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">×</span>
             <h3 class="modal-title" id="modalDateTitle">Turnos del Día</h3>
             
-            <div id="modalShiftsContainer" style="margin-bottom: 20px;">
-                </div>
+            <div id="modalShiftsContainer" style="margin-bottom: 20px;"></div>
 
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 12px;">
-                <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 15px;">Agregar turno este día</h4>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <div style="flex: 1;">
-                        <label class="stat-label">Ingreso</label>
-                        <input type="time" id="modalManIn" class="man-input" style="padding: 8px;">
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 16px;">
+                <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 15px;">Agregar turno este día</h4>
+                <div class="manual-row">
+                    <div class="manual-col">
+                        <label class="r-label">Ingreso</label>
+                        <input type="time" id="modalManIn" class="man-input" style="padding: 10px;">
                     </div>
-                    <div style="flex: 1;">
-                        <label class="stat-label">Salida</label>
-                        <input type="time" id="modalManOut" class="man-input" style="padding: 8px;">
+                    <div class="manual-col">
+                        <label class="r-label">Salida</label>
+                        <input type="time" id="modalManOut" class="man-input" style="padding: 10px;">
                     </div>
                 </div>
-                <button class="btn btn-in" style="margin-bottom: 0; padding: 10px; font-size: 15px;" onclick="addModalShift()">Guardar Turno</button>
+                <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 15px;" onclick="addModalShift()">Guardar Turno</button>
             </div>
         </div>
     </div>
@@ -182,7 +223,7 @@
         const statusMessage = document.getElementById('statusMessage');
         
         let currentDate = new Date();
-        let selectedModalDate = null; // Guarda la fecha del modal abierto
+        let selectedModalDate = null; 
 
         const feriadosArg = [
             '01-01', '02-16', '02-17', '03-24', '04-02', '04-03', '05-01', 
@@ -195,6 +236,15 @@
             const q = dateObj.getDate() <= 15 ? 'Q1' : 'Q2';
             return `${year}-${month}-${q}`;
         }
+        
+        // Función para mostrar el periodo textual (Ej: "1-15 Abr")
+        function updatePeriodoLabel() {
+            const today = new Date();
+            const day = today.getDate();
+            const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const m = monthNames[today.getMonth()];
+            document.getElementById('r-periodo').innerText = day <= 15 ? `1-15 ${m}` : `16-Fin ${m}`;
+        }
 
         function isHoliday(dateObj) {
             const monthDay = String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
@@ -202,8 +252,7 @@
         }
 
         function init() {
-            document.getElementById('currentQuincenaLabel').innerText = 
-                `Periodo: ${getQuincenaKey().replace('-Q1', ' (1ra Quincena)').replace('-Q2', ' (2da Quincena)')}`;
+            updatePeriodoLabel();
             
             if (entryTime) {
                 btnIn.style.display = 'none';
@@ -235,7 +284,7 @@
             btnIn.style.display = 'block';
             btnOut.style.display = 'none';
             statusMessage.innerText = 'No estás trabajando';
-            statusMessage.style.color = '#8e8e93';
+            statusMessage.style.color = 'var(--text-color)';
             
             updateStats();
             renderCalendar(); 
@@ -259,7 +308,7 @@
             if(processManualShift(dateVal, inVal, outVal)) {
                 document.getElementById('modalManIn').value = '';
                 document.getElementById('modalManOut').value = '';
-                openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate()); // Recargar modal
+                openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate()); 
             }
         }
 
@@ -289,6 +338,7 @@
             localStorage.setItem('shiftsData', JSON.stringify(data));
         }
 
+        // FUNCIÓN ELIMINAR UNIFICADA PARA MODAL Y LISTA
         function deleteShift(qKey, shiftIndex) {
             if(confirm("¿Seguro que querés eliminar este turno?")) {
                 let data = JSON.parse(localStorage.getItem('shiftsData'));
@@ -296,7 +346,10 @@
                 localStorage.setItem('shiftsData', JSON.stringify(data));
                 updateStats();
                 renderCalendar();
-                openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate()); // Recargar modal
+                // Si el modal está abierto, lo recarga
+                if(document.getElementById('dayModal').style.display === 'flex') {
+                    openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate());
+                }
             }
         }
 
@@ -309,23 +362,34 @@
             const logList = document.getElementById('logList');
             logList.innerHTML = '';
 
-            shifts.slice().sort((a, b) => b.in - a.in).forEach(shift => {
+            // Mapeamos para no perder el índice real al ordenar
+            const shiftsWithIndex = shifts.map((shift, index) => ({ ...shift, originalIndex: index }));
+
+            shiftsWithIndex.sort((a, b) => b.in - a.in).forEach(shift => {
                 totalHrs += shift.hours;
                 const inDate = new Date(shift.in);
-                const feriadoTag = isHoliday(inDate) ? `<div class="log-holiday">¡Feriado! (Paga x2)</div>` : '';
+                const feriadoTag = isHoliday(inDate) ? `<div class="log-holiday">¡Feriado! (x2)</div>` : '';
                 const dateStr = inDate.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short'});
                 const inStr = inDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
+                // AHORA CADA ITEM DE LA LISTA TIENE SU BOTÓN DE ELIMINAR
                 logList.innerHTML += `<li>
-                    <div>
-                        <div class="log-date" style="text-transform: capitalize;">${dateStr}</div>
+                    <div class="log-info">
+                        <div class="log-date">${dateStr}</div>
                         <div class="log-time">${inStr} - ${outStr}</div>
                         ${feriadoTag}
                     </div>
-                    <div class="log-hours">${shift.hours.toFixed(2)}h</div>
+                    <div class="log-actions">
+                        <div class="log-hours">${shift.hours.toFixed(2)}h</div>
+                        <button class="btn-delete-list" onclick="deleteShift('${quincena}', ${shift.originalIndex})">Eliminar</button>
+                    </div>
                 </li>`;
             });
+
+            if(shifts.length === 0) {
+                logList.innerHTML = `<li style="justify-content:center; color:var(--secondary-text);">No hay turnos en esta quincena.</li>`;
+            }
 
             document.getElementById('totalHours').innerText = totalHrs.toFixed(2);
             document.getElementById('totalShifts').innerText = shifts.length;
@@ -378,7 +442,7 @@
                 if (isHoliday(dayDate)) {
                     classes += ' holiday';
                 }
-                if (workedDaysHours[i]) {
+                if (workedDaysHours[i] !== undefined) {
                     classes += ' worked';
                     hoursBadge = `<div class="day-hours-badge">${workedDaysHours[i].toFixed(1)}h</div>`;
                 }
@@ -423,7 +487,7 @@
             }
 
             if(!hasShifts) {
-                container.innerHTML = `<p style="color:#8e8e93; font-size:14px; text-align:center;">No hay turnos registrados en este día.</p>`;
+                container.innerHTML = `<p style="color:var(--secondary-text); font-size:14px; text-align:center;">No hay turnos registrados en este día.</p>`;
             }
 
             document.getElementById('dayModal').style.display = 'flex';
@@ -433,7 +497,6 @@
             document.getElementById('dayModal').style.display = 'none';
         }
 
-        // Cerrar modal si se toca afuera de la caja
         window.onclick = function(event) {
             const modal = document.getElementById('dayModal');
             if (event.target == modal) {
