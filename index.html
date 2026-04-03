@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mis Horas">
+    <title>Mis Horas McD</title>
+    <style>
+        :root {
+            --bg-color: #f2f2f7; 
+            --text-color: #1c1c1e;
+            --mcd-red: #da291c;
+            --mcd-yellow: #ffc72c;
+            --success: #34c759; 
+            --card-bg: #ffffff;
+            --holiday-color: #ff3b30;
+        }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 40px; }
+        header { text-align: center; margin-bottom: 20px; margin-top: 20px; width: 100%; max-width: 350px; }
+        h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+        .status-text { font-size: 15px; color: #8e8e93; margin-top: 5px; }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); width: 100%; max-width: 350px; text-align: center; margin-bottom: 20px; }
+        
+        .btn { border: none; padding: 16px 30px; border-radius: 14px; font-size: 17px; font-weight: 600; width: 100%; margin-bottom: 15px; cursor: pointer; transition: all 0.2s ease; }
+        .btn:active { transform: scale(0.96); }
+        .btn-in { background-color: var(--success); color: white; box-shadow: 0 4px 10px rgba(52, 199, 89, 0.3); }
+        .btn-out { background-color: var(--mcd-red); color: white; display: none; box-shadow: 0 4px 10px rgba(218, 41, 28, 0.3); }
+        
+        .stats { display: flex; justify-content: space-between; margin-top: 10px; border-top: 1px solid #e5e5ea; padding-top: 15px;}
+        .stat-box { text-align: center; width: 48%; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--text-color); }
+        .stat-label { font-size: 12px; color: #8e8e93; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Calendario Ampliado y Mejorado */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .calendar-header h3 { margin: 0; font-size: 18px; font-weight: 600; text-transform: capitalize; }
+        .calendar-nav { background: none; border: none; font-size: 18px; color: var(--mcd-red); font-weight: bold; cursor: pointer; padding: 5px 10px; }
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #8e8e93; font-weight: 600; margin-bottom: 10px; }
+        
+        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { 
+            min-height: 60px; /* Hace el calendario más grande */
+            background-color: #f9f9f9; 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center; 
+            padding: 4px; 
+            position: relative; 
+            cursor: pointer;
+            border: 1px solid #f0f0f0;
+        }
+        .day-number { font-size: 14px; font-weight: 600; color: var(--text-color); margin-bottom: 2px;}
+        .day.today { border: 2px solid var(--mcd-red); background-color: #fffafa; }
+        .day.today .day-number { color: var(--mcd-red); }
+        .day.holiday .day-number { color: var(--holiday-color); }
+        .day.empty { background: transparent; border: none; pointer-events: none; }
+        .day-hours-badge { 
+            font-size: 11px; 
+            color: white; 
+            font-weight: 700; 
+            background: var(--success); 
+            padding: 2px 0; 
+            border-radius: 4px; 
+            width: 100%; 
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .section-title { font-size: 18px; font-weight: 600; width: 100%; max-width: 350px; text-align: left; margin: 10px 0; padding-left: 5px; }
+        #logList { list-style: none; padding: 0; margin: 0; width: 100%; max-width: 350px; text-align: left; }
+        #logList li { background: var(--card-bg); padding: 15px; margin-bottom: 10px; border-radius: 14px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .log-date { font-weight: 600; color: var(--text-color); }
+        .log-time { font-size: 13px; color: #8e8e93; margin-top: 3px; }
+        .log-hours { font-weight: 700; color: var(--success); font-size: 16px; background: rgba(52,199,89,0.1); padding: 5px 10px; border-radius: 8px; }
+        .log-holiday { font-size: 11px; color: var(--holiday-color); font-weight: 600; text-transform: uppercase; margin-top: 2px;}
+
+        .man-input { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 15px; background: #f9f9f9; color: var(--text-color); }
+        
+        /* Modal (Ventana Emergente para gestionar días) */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+        .modal-content { background-color: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 24px; font-weight: bold; color: #8e8e93; cursor: pointer; }
+        .modal-title { margin-top: 0; font-size: 20px; margin-bottom: 15px; color: var(--text-color); border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .shift-item-modal { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .btn-delete { background: var(--mcd-red); color: white; border: none; border-radius: 8px; padding: 6px 12px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mis Horas</h1>
+        <p class="status-text" id="currentQuincenaLabel">Quincena actual</p>
+    </header>
+
+    <div class="card">
+        <p class="status-text" id="statusMessage" style="margin-bottom: 15px; font-weight: 500;">No estás trabajando</p>
+        <button class="btn btn-in" id="btnIn" onclick="clockIn()">Entrada</button>
+        <button class="btn btn-out" id="btnOut" onclick="clockOut()">Salida</button>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="totalHours">0.0</div>
+                <div class="stat-label">Horas (Quinc.)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="totalShifts">0</div>
+                <div class="stat-label">Turnos</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Carga Manual</div>
+    <div class="card" style="text-align: left; padding-bottom: 15px;">
+        <div style="margin-bottom: 15px;">
+            <label class="stat-label">Fecha del Turno</label>
+            <input type="date" id="manDate" class="man-input">
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+                <label class="stat-label">Ingreso</label>
+                <input type="time" id="manIn" class="man-input">
+            </div>
+            <div style="flex: 1;">
+                <label class="stat-label">Salida</label>
+                <input type="time" id="manOut" class="man-input">
+            </div>
+        </div>
+        <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 15px;" onclick="addManualShift()">Guardar Turno Manual</button>
+    </div>
+
+    <div class="card" style="padding-bottom: 15px;">
+        <div class="calendar-header">
+            <button class="calendar-nav" onclick="changeMonth(-1)">❮</button>
+            <h3 id="monthYear">Mes Año</h3>
+            <button class="calendar-nav" onclick="changeMonth(1)">❯</button>
+        </div>
+        <div class="weekdays">
+            <div>Do</div><div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sa</div>
+        </div>
+        <div class="days" id="calendarDays"></div>
+        <p style="font-size: 12px; color: #8e8e93; margin-top: 15px; margin-bottom: 0;">* Tocá cualquier día para editar, agregar o eliminar turnos.</p>
+    </div>
+
+    <div class="section-title">Últimos Turnos</div>
+    <ul id="logList"></ul>
+
+    <div id="dayModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">×</span>
+            <h3 class="modal-title" id="modalDateTitle">Turnos del Día</h3>
+            
+            <div id="modalShiftsContainer" style="margin-bottom: 20px;">
+                </div>
+
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 12px;">
+                <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 15px;">Agregar turno este día</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div style="flex: 1;">
+                        <label class="stat-label">Ingreso</label>
+                        <input type="time" id="modalManIn" class="man-input" style="padding: 8px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label class="stat-label">Salida</label>
+                        <input type="time" id="modalManOut" class="man-input" style="padding: 8px;">
+                    </div>
+                </div>
+                <button class="btn btn-in" style="margin-bottom: 0; padding: 10px; font-size: 15px;" onclick="addModalShift()">Guardar Turno</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let entryTime = localStorage.getItem('entryTime');
+        const btnIn = document.getElementById('btnIn');
+        const btnOut = document.getElementById('btnOut');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        let currentDate = new Date();
+        let selectedModalDate = null; // Guarda la fecha del modal abierto
+
+        const feriadosArg = [
+            '01-01', '02-16', '02-17', '03-24', '04-02', '04-03', '05-01', 
+            '05-25', '06-17', '06-20', '07-09', '08-17', '10-12', '11-20', '12-08', '12-25'
+        ];
+
+        function getQuincenaKey(dateObj = new Date()) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const q = dateObj.getDate() <= 15 ? 'Q1' : 'Q2';
+            return `${year}-${month}-${q}`;
+        }
+
+        function isHoliday(dateObj) {
+            const monthDay = String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
+            return feriadosArg.includes(monthDay);
+        }
+
+        function init() {
+            document.getElementById('currentQuincenaLabel').innerText = 
+                `Periodo: ${getQuincenaKey().replace('-Q1', ' (1ra Quincena)').replace('-Q2', ' (2da Quincena)')}`;
+            
+            if (entryTime) {
+                btnIn.style.display = 'none';
+                btnOut.style.display = 'block';
+                statusMessage.innerText = `Trabajando desde las ${new Date(parseInt(entryTime)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                statusMessage.style.color = 'var(--success)';
+            }
+            updateStats();
+            renderCalendar();
+        }
+
+        function clockIn() {
+            entryTime = Date.now();
+            localStorage.setItem('entryTime', entryTime);
+            init();
+        }
+
+        function clockOut() {
+            if (!entryTime) return;
+            const exitTime = Date.now();
+            const workedMs = exitTime - parseInt(entryTime);
+            const workedHours = (workedMs / (1000 * 60 * 60)).toFixed(2);
+            
+            saveShift(parseInt(entryTime), exitTime, parseFloat(workedHours));
+            
+            localStorage.removeItem('entryTime');
+            entryTime = null;
+            
+            btnIn.style.display = 'block';
+            btnOut.style.display = 'none';
+            statusMessage.innerText = 'No estás trabajando';
+            statusMessage.style.color = '#8e8e93';
+            
+            updateStats();
+            renderCalendar(); 
+        }
+
+        function addManualShift() {
+            const dateVal = document.getElementById('manDate').value;
+            const inVal = document.getElementById('manIn').value;
+            const outVal = document.getElementById('manOut').value;
+            processManualShift(dateVal, inVal, outVal);
+            document.getElementById('manDate').value = '';
+            document.getElementById('manIn').value = '';
+            document.getElementById('manOut').value = '';
+        }
+
+        function addModalShift() {
+            const dateVal = `${selectedModalDate.getFullYear()}-${String(selectedModalDate.getMonth() + 1).padStart(2, '0')}-${String(selectedModalDate.getDate()).padStart(2, '0')}`;
+            const inVal = document.getElementById('modalManIn').value;
+            const outVal = document.getElementById('modalManOut').value;
+            
+            if(processManualShift(dateVal, inVal, outVal)) {
+                document.getElementById('modalManIn').value = '';
+                document.getElementById('modalManOut').value = '';
+                openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate()); // Recargar modal
+            }
+        }
+
+        function processManualShift(dateVal, inVal, outVal) {
+            if (!dateVal || !inVal || !outVal) {
+                alert('Por favor completá ingreso y salida.');
+                return false;
+            }
+            const inTime = new Date(`${dateVal}T${inVal}:00`).getTime();
+            let outTime = new Date(`${dateVal}T${outVal}:00`).getTime();
+            if (outTime < inTime) { outTime += 24 * 60 * 60 * 1000; }
+            const workedMs = outTime - inTime;
+            const workedHours = (workedMs / (1000 * 60 * 60)).toFixed(2);
+
+            saveShift(inTime, outTime, parseFloat(workedHours));
+            updateStats();
+            renderCalendar();
+            return true;
+        }
+
+        function saveShift(inTime, outTime, hours) {
+            const dateObj = new Date(inTime);
+            const key = getQuincenaKey(dateObj); 
+            let data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            if (!data[key]) data[key] = [];
+            data[key].push({ in: inTime, out: outTime, hours: hours });
+            localStorage.setItem('shiftsData', JSON.stringify(data));
+        }
+
+        function deleteShift(qKey, shiftIndex) {
+            if(confirm("¿Seguro que querés eliminar este turno?")) {
+                let data = JSON.parse(localStorage.getItem('shiftsData'));
+                data[qKey].splice(shiftIndex, 1);
+                localStorage.setItem('shiftsData', JSON.stringify(data));
+                updateStats();
+                renderCalendar();
+                openDayModal(selectedModalDate.getFullYear(), selectedModalDate.getMonth(), selectedModalDate.getDate()); // Recargar modal
+            }
+        }
+
+        function updateStats() {
+            const quincena = getQuincenaKey(new Date()); 
+            const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            const shifts = data[quincena] || [];
+            
+            let totalHrs = 0;
+            const logList = document.getElementById('logList');
+            logList.innerHTML = '';
+
+            shifts.slice().sort((a, b) => b.in - a.in).forEach(shift => {
+                totalHrs += shift.hours;
+                const inDate = new Date(shift.in);
+                const feriadoTag = isHoliday(inDate) ? `<div class="log-holiday">¡Feriado! (Paga x2)</div>` : '';
+                const dateStr = inDate.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short'});
+                const inStr = inDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                logList.innerHTML += `<li>
+                    <div>
+                        <div class="log-date" style="text-transform: capitalize;">${dateStr}</div>
+                        <div class="log-time">${inStr} - ${outStr}</div>
+                        ${feriadoTag}
+                    </div>
+                    <div class="log-hours">${shift.hours.toFixed(2)}h</div>
+                </li>`;
+            });
+
+            document.getElementById('totalHours').innerText = totalHrs.toFixed(2);
+            document.getElementById('totalShifts').innerText = shifts.length;
+        }
+
+        // --- FUNCIONES DEL CALENDARIO Y MODAL ---
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            document.getElementById('monthYear').innerText = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysContainer = document.getElementById('calendarDays');
+            daysContainer.innerHTML = '';
+
+            const allData = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            const workedDaysHours = {};
+            
+            for (const qKey in allData) {
+                allData[qKey].forEach(shift => {
+                    const d = new Date(shift.in);
+                    if (d.getFullYear() === year && d.getMonth() === month) {
+                        const day = d.getDate();
+                        workedDaysHours[day] = (workedDaysHours[day] || 0) + shift.hours;
+                    }
+                });
+            }
+
+            for (let i = 0; i < firstDay; i++) {
+                daysContainer.innerHTML += `<div class="day empty"></div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDate = new Date(year, month, i);
+                let classes = 'day';
+                let hoursBadge = '';
+                
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    classes += ' today';
+                }
+                if (isHoliday(dayDate)) {
+                    classes += ' holiday';
+                }
+                if (workedDaysHours[i]) {
+                    classes += ' worked';
+                    hoursBadge = `<div class="day-hours-badge">${workedDaysHours[i].toFixed(1)}h</div>`;
+                }
+
+                daysContainer.innerHTML += `<div class="${classes}" onclick="openDayModal(${year}, ${month}, ${i})">
+                    <div class="day-number">${i}</div>
+                    ${hoursBadge}
+                </div>`;
+            }
+        }
+
+        function openDayModal(year, month, day) {
+            selectedModalDate = new Date(year, month, day);
+            const dateStr = selectedModalDate.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('modalDateTitle').innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            
+            const container = document.getElementById('modalShiftsContainer');
+            container.innerHTML = '';
+
+            const allData = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            let hasShifts = false;
+
+            for (const qKey in allData) {
+                allData[qKey].forEach((shift, index) => {
+                    const d = new Date(shift.in);
+                    if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
+                        hasShifts = true;
+                        const inStr = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        
+                        container.innerHTML += `
+                            <div class="shift-item-modal">
+                                <div>
+                                    <strong style="font-size:16px;">${inStr} - ${outStr}</strong><br>
+                                    <span style="color:var(--success); font-weight:bold; font-size:14px;">${shift.hours.toFixed(2)} horas</span>
+                                </div>
+                                <button class="btn-delete" onclick="deleteShift('${qKey}', ${index})">Borrar</button>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            if(!hasShifts) {
+                container.innerHTML = `<p style="color:#8e8e93; font-size:14px; text-align:center;">No hay turnos registrados en este día.</p>`;
+            }
+
+            document.getElementById('dayModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('dayModal').style.display = 'none';
+        }
+
+        // Cerrar modal si se toca afuera de la caja
+        window.onclick = function(event) {
+            const modal = document.getElementById('dayModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
