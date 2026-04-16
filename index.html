@@ -134,6 +134,15 @@
     </div>
 
     <div class="section-title">Resumen Quincenal</div>
+    <div class="section-title">Sueldo Estimado (Bruto)</div>
+    <div class="card" style="background: #f4fce3; border: 1px solid #d8f5a2;">
+        <div style="text-align: center;">
+            <div class="r-value" id="sueldoEstimado" style="color: #2b8a3e; font-size: 28px; margin-bottom: 5px;">$0.00</div>
+            <div id="sueldoDetalle" style="font-size: 13px; color: #5c940d; line-height: 1.4; font-weight: 500;">
+                </div>
+            <p style="font-size: 11px; color: var(--secondary-text); margin-top: 10px; margin-bottom: 0;">* Estimación en bruto. No incluye descuentos de recibo.</p>
+        </div>
+    </div>
     <div class="card">
         <div class="resumen-grid">
             <div class="resumen-item">
@@ -353,7 +362,7 @@
             }
         }
 
-        function updateStats() {
+function updateStats() {
             const quincena = getQuincenaKey(new Date()); 
             const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
             const shifts = data[quincena] || [];
@@ -362,7 +371,6 @@
             const logList = document.getElementById('logList');
             logList.innerHTML = '';
 
-            // Mapeamos para no perder el índice real al ordenar
             const shiftsWithIndex = shifts.map((shift, index) => ({ ...shift, originalIndex: index }));
 
             shiftsWithIndex.sort((a, b) => b.in - a.in).forEach(shift => {
@@ -373,7 +381,6 @@
                 const inStr = inDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
-                // AHORA CADA ITEM DE LA LISTA TIENE SU BOTÓN DE ELIMINAR
                 logList.innerHTML += `<li>
                     <div class="log-info">
                         <div class="log-date">${dateStr}</div>
@@ -393,6 +400,32 @@
 
             document.getElementById('totalHours').innerText = totalHrs.toFixed(2);
             document.getElementById('totalShifts').innerText = shifts.length;
+
+            // --- NUEVO: CÁLCULO DE SUELDO ---
+            const pagosActual = calcularPagoQuincena(quincena);
+            let sueldoTotalBruto = pagosActual.payBase + pagosActual.payNight + pagosActual.payFeriado;
+            let detalleBono = "";
+
+            // Lógica para el 24% en la segunda quincena
+            if (quincena.endsWith('Q2')) {
+                const q1Key = quincena.replace('Q2', 'Q1');
+                const pagosQ1 = calcularPagoQuincena(q1Key);
+                
+                // El 24% se calcula sobre el total de horas base del mes (Q1 + Q2)
+                const baseMesTotal = pagosActual.payBase + pagosQ1.payBase; 
+                const bono24 = baseMesTotal * 0.24;
+                
+                sueldoTotalBruto += bono24;
+                detalleBono = `<div style="color: #2f9e44; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #b2f2bb;">+ 24% Mes (Presentismo y Entrenador): $${bono24.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+            }
+
+            document.getElementById('sueldoEstimado').innerText = "$" + sueldoTotalBruto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            document.getElementById('sueldoDetalle').innerHTML = 
+                `Base Q actual: $${pagosActual.payBase.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+                 Nocturnidad Q actual: $${pagosActual.payNight.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+                 Feriados Q actual: $${pagosActual.payFeriado.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                 ${detalleBono}`;
         }
 
         // --- FUNCIONES DEL CALENDARIO Y MODAL ---
@@ -401,6 +434,40 @@
             renderCalendar();
         }
 
+        function calcularPagoQuincena(qKey) {
+            const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            const shifts = data[qKey] || [];
+            
+            const baseRate = 5229.46;
+            const nightRate = 500; 
+            
+            let payBase = 0;
+            let payNight = 0;
+            let payFeriado = 0;
+
+            shifts.forEach(shift => {
+                // Calculamos minutos nocturnos exactos
+                let nightMins = 0;
+                let currentMs = shift.in;
+                while(currentMs < shift.out) {
+                    let h = new Date(currentMs).getHours();
+                    // Nocturnidad: de 21:00 a 06:00
+                    if (h >= 21 || h < 6) nightMins++;
+                    currentMs += 60000;
+                }
+                
+                payBase += shift.hours * baseRate;
+                payNight += (nightMins / 60) * nightRate;
+                
+                // Si es feriado, sumamos el 100% de la base de esas horas
+                if (isHoliday(new Date(shift.in))) {
+                    payFeriado += shift.hours * baseRate; 
+                }
+            });
+            
+            return { payBase, payNight, payFeriado };
+        }
+        
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
