@@ -8,133 +8,404 @@
     <meta name="apple-mobile-web-app-title" content="Mis Horas">
     <link rel="apple-touch-icon" href="icono.png">
     <title>Mis Horas McD</title>
+    <script>
+        // Aplica el tema guardado ANTES de pintar la pagina, para que no se vea un flash del tema equivocado.
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+            } catch (e) {}
+        })();
+    </script>
     <style>
         :root {
-            --bg-color: #f2f2f7; 
+            --bg-top: #f4f5f9;
+            --bg-bottom: #e9ebf2;
             --text-color: #1c1c1e;
-            --secondary-text: #8e8e93;
+            --secondary-text: #8a8a92;
             --mcd-red: #da291c;
+            --mcd-red-light: #ff6a5a;
             --mcd-yellow: #ffc72c;
-            --success: #34c759; 
+            --success: #34c759;
+            --success-dark: #1f9c46;
             --card-bg: #ffffff;
             --holiday-color: #ff3b30;
-            --divider: #e5e5ea;
+            --divider: #ececf1;
+            --shadow-soft: 0 1px 2px rgba(20,20,30,0.04), 0 10px 24px -8px rgba(20,20,30,0.10);
+            --shadow-lift: 0 2px 4px rgba(20,20,30,0.05), 0 16px 32px -12px rgba(20,20,30,0.16);
+            --radius: 22px;
+            --surface-1: #f4f4f7;
+            --surface-1-active: #e8e8ee;
+            --surface-2: #fafafb;
+            --surface-input-focus: #ffffff;
+            --tint-success: #eafcf0;
+            --tint-success-strong: #e6fce5;
+            --tint-success-border: #b2f2bb;
+            --tint-danger: #fff0ef;
+            --tint-danger-strong: #ffe0de;
+            --tint-today: #fff6f5;
+            --tint-warning: #fffaeb;
+            --money-color: #1f9c46;
+            --sueldo-gradient: linear-gradient(155deg, #eefcef 0%, #e3f9e8 55%, #d8f5df 100%);
+            --glass-bg: rgba(255,255,255,0.75);
+            --glass-border: rgba(0,0,0,0.04);
+            --btn-neutral-bg: #1c1c1e;
+            --btn-neutral-text: #ffffff;
+            color-scheme: light;
         }
-        
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif; }
-        
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            margin: 0; 
-            padding: 16px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-            padding-bottom: 60px; 
+
+        /* --- MODO OSCURO: automatico segun el sistema, salvo que se haya elegido uno a mano --- */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-top: #1a1a1d;
+                --bg-bottom: #0d0d0f;
+                --text-color: #f2f2f4;
+                --secondary-text: #98989f;
+                --card-bg: #1e1e21;
+                --divider: #2e2e32;
+                --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 10px 24px -8px rgba(0,0,0,0.55);
+                --shadow-lift: 0 2px 4px rgba(0,0,0,0.45), 0 16px 32px -12px rgba(0,0,0,0.65);
+                --surface-1: #26262a;
+                --surface-1-active: #303035;
+                --surface-2: #222226;
+                --surface-input-focus: #2a2a2f;
+                --tint-success: rgba(52,199,89,0.14);
+                --tint-success-strong: rgba(52,199,89,0.22);
+                --tint-success-border: rgba(52,199,89,0.35);
+                --tint-danger: rgba(255,59,48,0.14);
+                --tint-danger-strong: rgba(255,59,48,0.22);
+                --tint-today: rgba(218,41,28,0.16);
+                --tint-warning: rgba(255,199,44,0.14);
+                --money-color: #3ddc73;
+                --sueldo-gradient: linear-gradient(155deg, #17251b 0%, #142219 55%, #101b15 100%);
+                --glass-bg: rgba(30,30,33,0.75);
+                --glass-border: rgba(255,255,255,0.06);
+                --btn-neutral-bg: #303035;
+                --btn-neutral-text: #ffffff;
+                color-scheme: dark;
+            }
         }
+        :root[data-theme="dark"] {
+            --bg-top: #1a1a1d;
+            --bg-bottom: #0d0d0f;
+            --text-color: #f2f2f4;
+            --secondary-text: #98989f;
+            --card-bg: #1e1e21;
+            --divider: #2e2e32;
+            --shadow-soft: 0 1px 2px rgba(0,0,0,0.35), 0 10px 24px -8px rgba(0,0,0,0.55);
+            --shadow-lift: 0 2px 4px rgba(0,0,0,0.45), 0 16px 32px -12px rgba(0,0,0,0.65);
+            --surface-1: #26262a;
+            --surface-1-active: #303035;
+            --surface-2: #222226;
+            --surface-input-focus: #2a2a2f;
+            --tint-success: rgba(52,199,89,0.14);
+            --tint-success-strong: rgba(52,199,89,0.22);
+            --tint-success-border: rgba(52,199,89,0.35);
+            --tint-danger: rgba(255,59,48,0.14);
+            --tint-danger-strong: rgba(255,59,48,0.22);
+            --tint-today: rgba(218,41,28,0.16);
+            --tint-warning: rgba(255,199,44,0.14);
+            --money-color: #3ddc73;
+            --sueldo-gradient: linear-gradient(155deg, #17251b 0%, #142219 55%, #101b15 100%);
+            --glass-bg: rgba(30,30,33,0.75);
+            --glass-border: rgba(255,255,255,0.06);
+            --btn-neutral-bg: #303035;
+            --btn-neutral-text: #ffffff;
+            color-scheme: dark;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        html { background: var(--bg-bottom); }
+
+        body {
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 420px);
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            padding-bottom: 60px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .app-shell { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .app-shell > * { animation: fadeInUp 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+        .app-shell > *:nth-child(1) { animation-delay: 0s; }
+        .app-shell > *:nth-child(2) { animation-delay: 0.04s; }
+        .app-shell > *:nth-child(3) { animation-delay: 0.08s; }
+        .app-shell > *:nth-child(4) { animation-delay: 0.12s; }
+        .app-shell > *:nth-child(5) { animation-delay: 0.16s; }
+        .app-shell > *:nth-child(6) { animation-delay: 0.20s; }
+        .app-shell > *:nth-child(7) { animation-delay: 0.24s; }
+        .app-shell > *:nth-child(8) { animation-delay: 0.28s; }
+        .app-shell > *:nth-child(9) { animation-delay: 0.32s; }
+        .app-shell > *:nth-child(10) { animation-delay: 0.36s; }
+        .app-shell > *:nth-child(11) { animation-delay: 0.40s; }
+        .app-shell > *:nth-child(12) { animation-delay: 0.44s; }
+        .app-shell > *:nth-child(13) { animation-delay: 0.48s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes dayIn {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes modalBackdropIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- TOAST (confirmaciones no invasivas) --- */
+        .toast {
+            position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(16px);
+            background: var(--text-color); color: var(--card-bg); padding: 13px 22px; border-radius: 16px;
+            font-size: 14px; font-weight: 700; box-shadow: var(--shadow-lift); opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease; z-index: 200; max-width: 88%; text-align: center;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
 
         /* --- HEADER Y LOGO --- */
-        header { text-align: center; margin-bottom: 15px; margin-top: 25px; width: 100%; max-width: 380px; }
-        .logo-svg { width: 65px; height: auto; margin-bottom: 5px; }
-        .status-text { font-size: 15px; color: var(--secondary-text); margin-top: 5px; font-weight: 500;}
+        header { position: relative; text-align: center; margin-bottom: 8px; margin-top: 20px; width: 100%; max-width: 380px; }
+        .logo-wrap { position: relative; display: inline-flex; justify-content: center; align-items: center; width: 84px; height: 84px; margin-bottom: 6px; }
+        .logo-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,199,44,0.35) 0%, rgba(255,199,44,0) 70%);
+            filter: blur(2px);
+        }
+        .logo-svg { position: relative; width: 58px; height: auto; filter: drop-shadow(0 4px 10px rgba(218,41,28,0.18)); }
+        .app-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; margin: 2px 0 2px 0; }
+        .app-subtitle { font-size: 13px; color: var(--secondary-text); font-weight: 500; margin: 0; }
+        .status-text { font-size: 15px; color: var(--secondary-text); margin-top: 5px; font-weight: 500; }
+
+        .btn-config, .btn-theme {
+            position: absolute; top: 4px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; box-shadow: var(--shadow-soft);
+            color: var(--text-color);
+            transition: transform 0.15s ease, background 0.3s ease;
+        }
+        .btn-config { right: 0; }
+        .btn-theme { left: 0; }
+        .btn-config:active, .btn-theme:active { transform: scale(0.9); }
+        .btn-config svg, .btn-theme svg { width: 18px; height: 18px; }
 
         /* --- ESTRUCTURA TIPO APP (SECCIONES) --- */
-        .section-title { 
-            font-size: 13px; 
-            font-weight: 600; 
-            color: var(--secondary-text); 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            width: 100%; 
-            max-width: 380px; 
-            text-align: left; 
-            margin: 20px 0 8px 10px; 
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            width: 100%;
+            max-width: 380px;
+            text-align: left;
+            margin: 24px 0 10px 12px;
         }
-        
-        .card { 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 20px; 
-            box-shadow: 0 4px 14px rgba(0,0,0,0.03); 
-            width: 100%; 
-            max-width: 380px; 
-            margin-bottom: 10px; 
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(20,20,30,0.04);
+            box-shadow: var(--shadow-soft);
+            width: 100%;
+            max-width: 380px;
+            margin-bottom: 10px;
+            transition: box-shadow 0.2s ease;
         }
 
         /* --- BOTONES DE FICHAJE --- */
         .fichaje-container { text-align: center; }
-        #statusMessage { margin-bottom: 20px; font-size: 16px; font-weight: 600; }
-        .btn { border: none; padding: 18px 20px; border-radius: 16px; font-size: 17px; font-weight: 700; width: 100%; cursor: pointer; transition: transform 0.1s ease; display: flex; justify-content: center; align-items: center; gap: 8px;}
-        .btn:active { transform: scale(0.96); }
-        .btn-in { background-color: var(--success); color: white; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.2); }
-        .btn-out { background-color: var(--mcd-red); color: white; display: none; box-shadow: 0 4px 12px rgba(218, 41, 28, 0.2); }
-        .btn-history { background-color: var(--text-color); color: white; margin-top: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        #statusMessage { margin-bottom: 18px; font-size: 16px; font-weight: 600; }
+        .btn {
+            border: none; padding: 18px 20px; border-radius: 16px; font-size: 16px; font-weight: 700;
+            width: 100%; cursor: pointer; transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            letter-spacing: -0.1px;
+        }
+        .btn:active { transform: scale(0.96); filter: brightness(0.96); }
+        .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .btn-in { background: linear-gradient(135deg, #30d158, var(--success-dark)); color: white; box-shadow: 0 6px 16px -4px rgba(31,156,70,0.45); }
+        .btn-out { background: linear-gradient(135deg, var(--mcd-red-light), var(--mcd-red)); color: white; display: none; box-shadow: 0 6px 16px -4px rgba(218,41,28,0.4); }
+        .btn-history { background: var(--btn-neutral-bg); color: var(--btn-neutral-text); margin-top: 10px; box-shadow: 0 6px 16px -4px rgba(0,0,0,0.3); }
+        .btn-secondary { background: var(--surface-1); color: var(--text-color); box-shadow: none; }
 
         /* --- RESUMEN QUINCENAL --- */
         .resumen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
         .resumen-item { display: flex; flex-direction: column; justify-content: center; }
-        .r-value { font-size: 20px; font-weight: 800; color: var(--text-color); margin-bottom: 2px;}
-        .r-label { font-size: 11px; color: var(--secondary-text); font-weight: 600; text-transform: uppercase; }
-        .r-divider { width: 1px; background-color: var(--divider); height: 80%; margin: auto 0; }
+        .r-value { font-size: 21px; font-weight: 800; color: var(--text-color); margin-bottom: 3px; font-variant-numeric: tabular-nums; letter-spacing: -0.4px; }
+        .r-label { font-size: 10.5px; color: var(--secondary-text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+        .r-divider { width: 1px; background: linear-gradient(var(--divider), var(--divider)); height: 74%; margin: auto 0; }
 
         /* --- INPUTS --- */
         .manual-row { display: flex; gap: 12px; margin-bottom: 15px; }
         .manual-col { flex: 1; }
-        .man-input { width: 100%; padding: 14px; margin-top: 6px; border: 1px solid var(--divider); border-radius: 12px; font-size: 15px; background: #fafafa; color: var(--text-color); font-weight: 500;}
+        .man-input {
+            width: 100%; padding: 13px 14px; margin-top: 6px; border: 1.5px solid var(--divider);
+            border-radius: 13px; font-size: 15px; background: var(--surface-2); color: var(--text-color); font-weight: 500;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .man-input:focus { outline: none; border-color: var(--mcd-red); background: var(--surface-input-focus); }
 
         /* --- CALENDARIO --- */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-header h3 { margin: 0; font-size: 18px; font-weight: 700; text-transform: capitalize; }
-        .calendar-nav { background: #f2f2f7; border-radius: 50%; border: none; width: 32px; height: 32px; font-size: 16px; color: var(--mcd-red); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;}
-        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; color: var(--secondary-text); font-weight: 600; margin-bottom: 10px; }
-        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .day { min-height: 60px; background-color: #f9f9f9; border-radius: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 4px; position: relative; cursor: pointer; border: 1px solid #f0f0f0; }
-        .day-number { font-size: 15px; font-weight: 600; color: var(--text-color); margin-bottom: 2px;}
-        .day.today { border: 2px solid var(--mcd-red); background-color: #fffafa; }
-        .day.today .day-number { color: var(--mcd-red); }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .calendar-header h3 { margin: 0; font-size: 17px; font-weight: 700; text-transform: capitalize; letter-spacing: -0.2px; }
+        .calendar-nav {
+            background: var(--surface-1); border-radius: 50%; border: none; width: 32px; height: 32px; font-size: 15px;
+            color: var(--mcd-red); font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: background 0.15s ease;
+        }
+        .calendar-nav:active { background: var(--surface-1-active); }
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11.5px; color: var(--secondary-text); font-weight: 700; margin-bottom: 8px; letter-spacing: 0.3px; }
+        .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .day {
+            min-height: 54px; background-color: var(--surface-1); border-radius: 12px; display: flex; flex-direction: column;
+            justify-content: flex-start; align-items: center; padding: 5px 2px; position: relative; cursor: pointer;
+            border: 1px solid transparent; transition: transform 0.1s ease;
+            animation: dayIn 0.25s ease both;
+        }
+        .day:active { transform: scale(0.93); }
+        .day-number { font-size: 14px; font-weight: 600; color: var(--text-color); margin-bottom: 3px; }
+        .day.today { box-shadow: inset 0 0 0 2px var(--mcd-red); background-color: var(--tint-today); }
+        .day.today .day-number { color: var(--mcd-red); font-weight: 800; }
         .day.holiday .day-number { color: var(--holiday-color); }
+        .day.holiday::after { content: ''; position: absolute; top: 6px; right: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--holiday-color); }
+        .day.worked { background-color: var(--tint-success); }
         .day.empty { background: transparent; border: none; pointer-events: none; }
-        .day-hours-badge { font-size: 11px; color: white; font-weight: 700; background: var(--success); padding: 2px 0; border-radius: 4px; width: 100%; text-align: center; margin-top: auto; }
+        .day-hours-badge {
+            font-size: 10px; color: white; font-weight: 700;
+            background: linear-gradient(135deg, #30d158, var(--success-dark));
+            padding: 2px 5px; border-radius: 20px; width: auto; text-align: center; margin-top: auto;
+        }
 
         /* --- ÚLTIMOS TURNOS --- */
-        .list-card { padding: 0; overflow: hidden;}
+        .list-card { padding: 0; overflow: hidden; }
         #logList { list-style: none; padding: 0; margin: 0; width: 100%; }
-        #logList li { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--divider); background: var(--card-bg);}
+        #logList li {
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 18px 15px 16px;
+            border-bottom: 1px solid var(--divider); background: var(--card-bg); position: relative;
+        }
+        #logList li.log-item::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 4px; background: var(--success); }
+        #logList li.log-item.log-item-feriado::before { background: var(--holiday-color); }
+        #logList li.log-item { padding-left: 22px; }
         #logList li:last-child { border-bottom: none; }
         .log-info { flex: 1; }
-        .log-date { font-weight: 600; color: var(--text-color); font-size: 15px; text-transform: capitalize;}
-        .log-time { font-size: 13px; color: var(--secondary-text); margin-top: 4px; }
-        .log-holiday { font-size: 11px; color: var(--holiday-color); font-weight: 600; text-transform: uppercase; margin-top: 2px;}
-        .log-actions { display: flex; align-items: center; gap: 15px; }
-        .log-hours { font-weight: 700; color: var(--success); font-size: 16px; }
-        .btn-delete-list { background: #ffeeed; color: var(--mcd-red); border: none; border-radius: 8px; padding: 8px 12px; font-weight: 700; font-size: 12px; cursor: pointer; }
+        .log-date { font-weight: 700; color: var(--text-color); font-size: 14.5px; text-transform: capitalize; }
+        .log-time { font-size: 13px; color: var(--secondary-text); margin-top: 3px; font-variant-numeric: tabular-nums; }
+        .log-holiday { font-size: 10.5px; color: var(--holiday-color); font-weight: 700; text-transform: uppercase; margin-top: 3px; letter-spacing: 0.3px; }
+        .log-actions { display: flex; align-items: center; gap: 14px; }
+        .log-hours { font-weight: 800; color: var(--success-dark); font-size: 15px; font-variant-numeric: tabular-nums; }
+        .btn-delete-list { background: var(--tint-danger); color: var(--mcd-red); border: none; border-radius: 9px; padding: 8px 12px; font-weight: 700; font-size: 11.5px; cursor: pointer; transition: background 0.15s ease; }
+        .btn-delete-list:active { background: var(--tint-danger-strong); }
 
         /* --- MODALS --- */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .modal-content { background-color: white; padding: 25px; border-radius: 24px; width: 90%; max-width: 380px; position: relative; max-height: 85vh; overflow-y: auto; }
-        .close-modal { position: absolute; right: 20px; top: 20px; font-size: 26px; font-weight: 500; color: var(--secondary-text); cursor: pointer; }
-        .modal-title { margin-top: 0; font-size: 20px; margin-bottom: 15px; color: var(--text-color); padding-bottom: 15px; font-weight: 700;}
-        .shift-item-modal { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .btn-delete { background: var(--mcd-red); color: white; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(20,20,25,0.45); justify-content: center; align-items: center; backdrop-filter: blur(6px); padding: 16px; animation: modalBackdropIn 0.2s ease both; }
+        .modal-content {
+            background-color: var(--card-bg); padding: 26px; border-radius: 28px; width: 100%; max-width: 380px;
+            position: relative; max-height: 85vh; overflow-y: auto;
+            box-shadow: var(--shadow-lift);
+            animation: modalPop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+        }
+        @keyframes modalPop {
+            from { opacity: 0; transform: translateY(14px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .close-modal {
+            position: absolute; right: 18px; top: 16px; width: 30px; height: 30px; border-radius: 50%;
+            background: var(--surface-1); font-size: 20px; font-weight: 500; color: var(--secondary-text);
+            cursor: pointer; display: flex; justify-content: center; align-items: center; line-height: 1;
+        }
+        .modal-title { margin-top: 0; font-size: 19px; margin-bottom: 16px; color: var(--text-color); padding-bottom: 15px; font-weight: 800; letter-spacing: -0.2px; padding-right: 30px; }
+        .shift-item-modal { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--divider); }
+        .btn-delete { background: linear-gradient(135deg, var(--mcd-red-light), var(--mcd-red)); color: white; border: none; border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 12.5px; cursor: pointer; }
 
         /* Tarjeta dentro del historial */
-        .history-card { background: #ffffff; border-radius: 16px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .history-card { background: var(--card-bg); border-radius: 18px; padding: 18px; margin-bottom: 15px; border: 1px solid rgba(20,20,30,0.04); box-shadow: var(--shadow-soft); }
+
+        /* --- CARD DE SUELDO DESTACADA --- */
+        .card-sueldo {
+            background: var(--sueldo-gradient);
+            border: 1px solid rgba(31,156,70,0.12);
+            position: relative; overflow: hidden;
+        }
+        .card-sueldo::before {
+            content: ''; position: absolute; top: -40%; right: -20%; width: 60%; height: 140%;
+            background: radial-gradient(circle, rgba(255,199,44,0.16) 0%, rgba(255,199,44,0) 70%);
+        }
+
+        /* --- CONFIGURACIÓN --- */
+        .config-section-title { font-size: 11.5px; font-weight: 800; color: var(--secondary-text); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px 0; }
+        .config-section-title:first-of-type { margin-top: 0; }
+        .config-row { margin-bottom: 12px; }
+        .config-row label { font-size: 13px; font-weight: 600; color: var(--text-color); display: block; margin-bottom: 4px; }
+        .config-row-inline { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; background: var(--surface-1); padding: 12px 14px; border-radius: 13px; }
+        .config-row-inline label { font-size: 14px; font-weight: 600; flex: 1; }
+        .config-row-inline input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--mcd-red); }
+        .escala-list { border: 1px solid var(--divider); border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+        .escala-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 12.5px; border-bottom: 1px solid var(--divider); }
+        .escala-list-item:last-child { border-bottom: none; }
+        .escala-list-item.overridden { background: var(--tint-warning); }
+        .escala-mes { font-weight: 700; text-transform: capitalize; }
+        .escala-valores { color: var(--secondary-text); text-align: right; font-variant-numeric: tabular-nums; }
+        .escala-del { background: none; border: none; color: var(--mcd-red); font-size: 18px; font-weight: 700; cursor: pointer; padding: 0 0 0 10px; line-height: 1; }
+        .escala-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .backup-row { display: flex; gap: 10px; margin-top: 4px; }
+        .backup-row .btn { padding: 12px; font-size: 13.5px; }
+
+        /* --- RESUMEN MENSUAL --- */
+        .mes-bar-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; }
+        .mes-bar-row:not(:last-child) { border-bottom: 1px solid var(--divider); }
+        .mes-bar-label { font-size: 12px; font-weight: 700; color: var(--text-color); width: 46px; text-transform: capitalize; flex-shrink: 0; }
+        .mes-bar-track { flex: 1; background: var(--surface-1); border-radius: 8px; height: 10px; overflow: hidden; }
+        .mes-bar-fill { height: 100%; background: linear-gradient(90deg, var(--mcd-yellow), var(--mcd-red)); border-radius: 8px; transition: width 0.5s cubic-bezier(0.2,0.8,0.3,1); }
+        .mes-bar-value { font-size: 12px; color: var(--secondary-text); text-align: right; width: 96px; flex-shrink: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .mes-bar-value strong { color: var(--text-color); }
+        .empty-hint { text-align: center; color: var(--secondary-text); font-size: 13px; padding: 10px 0; }
     </style>
 </head>
 <body>
 
+    <div class="app-shell">
     <header>
-        <svg class="logo-svg" viewBox="0 0 108 96" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#ffc72c" d="M12,93 l-12,0 c0,-43.5 16.9,-62.5 29,-62.5 c9.1,0 15.8,8.4 20.6,23.1 c5.4,-15.3 12.7,-23.1 22.2,-23.1 c12.1,0 29,19 29,62.5 l-11.8,0 c0,-33.9 -10.5,-48.9 -17.2,-48.9 c-7.2,0 -14.8,15.9 -14.8,48.9 l-11.9,0 c0,-33 -7.6,-48.9 -14.8,-48.9 c-6.7,0 -18.4,15 -18.4,48.9 z"/>
-        </svg>
+        <button class="btn-theme" id="btnTheme" onclick="toggleTheme()" title="Cambiar tema"></button>
+        <button class="btn-config" onclick="openConfigModal()" title="Configuración">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+        </button>
+        <div class="logo-wrap">
+            <svg class="logo-svg" viewBox="0 0 108 96" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#ffc72c" d="M12,93 l-12,0 c0,-43.5 16.9,-62.5 29,-62.5 c9.1,0 15.8,8.4 20.6,23.1 c5.4,-15.3 12.7,-23.1 22.2,-23.1 c12.1,0 29,19 29,62.5 l-11.8,0 c0,-33.9 -10.5,-48.9 -17.2,-48.9 c-7.2,0 -14.8,15.9 -14.8,48.9 l-11.9,0 c0,-33 -7.6,-48.9 -14.8,-48.9 c-6.7,0 -18.4,15 -18.4,48.9 z"/>
+            </svg>
+        </div>
+        <h1 class="app-title">Mis Horas</h1>
+        <p class="app-subtitle">Fichajes, calendario y sueldo estimado</p>
     </header>
 
     <div class="card fichaje-container">
         <p class="status-text" id="statusMessage">No estás trabajando</p>
-        <button class="btn btn-in" id="btnIn" onclick="clockIn()">Marcar Entrada</button>
-        <button class="btn btn-out" id="btnOut" onclick="clockOut()">Marcar Salida</button>
+        <button class="btn btn-in" id="btnIn" onclick="clockIn()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Marcar Entrada
+        </button>
+        <button class="btn btn-out" id="btnOut" onclick="clockOut()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+            Marcar Salida
+        </button>
     </div>
 
     <div class="section-title">Resumen Quincena Actual</div>
@@ -178,17 +449,26 @@
     </div>
 
     <div class="section-title">Sueldo Estimado (Bruto)</div>
-    <div class="card" style="background: #f4fce3; border: 1px solid #d8f5a2;">
-        <div style="text-align: center;">
-            <div class="r-value" id="sueldoEstimado" style="color: #2b8a3e; font-size: 28px; margin-bottom: 5px;">$0.00</div>
-            <div id="sueldoDetalle" style="font-size: 13px; color: #5c940d; line-height: 1.4; font-weight: 500;">
+    <div class="card card-sueldo">
+        <div style="text-align: center; position: relative;">
+            <div class="r-value" id="sueldoEstimado" style="color: var(--money-color); font-size: 30px; margin-bottom: 6px;">$0.00</div>
+            <div id="sueldoDetalle" style="font-size: 13px; color: var(--money-color); opacity: 0.85; line-height: 1.5; font-weight: 500;">
                 </div>
             <p style="font-size: 11px; color: var(--secondary-text); margin-top: 10px; margin-bottom: 0;">* Estimación en bruto. No incluye descuentos de ley.</p>
         </div>
     </div>
 
+    <div class="section-title">Resumen Mensual</div>
+    <div class="card" id="resumenMensualCard">
+        <div id="resumenMensualChart"></div>
+    </div>
+
     <div style="width: 100%; max-width: 380px;">
-        <button class="btn btn-history" onclick="openHistoryModal()">📋 Ver Historial de Quincenas</button>
+        <button class="btn btn-history" onclick="openHistoryModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Ver Historial de Quincenas
+        </button>
+    </div>
     </div>
 
     <div id="dayModal" class="modal">
@@ -198,7 +478,7 @@
             
             <div id="modalShiftsContainer" style="margin-bottom: 20px;"></div>
 
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 16px;">
+            <div style="background: var(--surface-1); padding: 15px; border-radius: 16px;">
                 <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 15px;">Agregar turno este día</h4>
                 <div class="manual-row">
                     <div class="manual-col">
@@ -216,13 +496,77 @@
     </div>
 
     <div id="historyModal" class="modal">
-        <div class="modal-content" style="background: #f2f2f7; padding: 20px 15px;">
+        <div class="modal-content" style="background: var(--surface-1); padding: 20px 15px;">
             <span class="close-modal" onclick="closeHistoryModal()">×</span>
             <h3 class="modal-title" style="text-align: center; margin-bottom: 5px;">Historial de Cobros</h3>
             <p style="text-align: center; font-size: 12px; color: var(--secondary-text); margin-top: 0; margin-bottom: 20px;">Cargá lo que cobraste en mano para ver los descuentos.</p>
             
             <div id="historyContainer" style="display: flex; flex-direction: column;">
                 </div>
+        </div>
+    </div>
+
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeConfigModal()">×</span>
+            <h3 class="modal-title" style="border-bottom: 1px solid var(--divider);">Configuración</h3>
+
+            <div class="config-section-title">Tus datos (Empleado B)</div>
+            <div class="config-row">
+                <label>Fecha de ingreso (para calcular antigüedad)</label>
+                <input type="date" id="cfgHireDate" class="man-input" style="margin-top:0;">
+            </div>
+            <div class="config-row-inline">
+                <label for="cfgEntrenador">Sos entrenador</label>
+                <input type="checkbox" id="cfgEntrenador">
+            </div>
+            <div class="escala-form-grid">
+                <div>
+                    <label class="r-label">Plus entrenador (%)</label>
+                    <input type="number" step="0.1" id="cfgEntrenadorPct" class="man-input" style="margin-top:4px;">
+                </div>
+                <div>
+                    <label class="r-label">Presentismo (%)</label>
+                    <input type="number" step="0.1" id="cfgPresentismoPct" class="man-input" style="margin-top:4px;">
+                </div>
+            </div>
+            <p style="font-size: 11px; color: var(--secondary-text); margin: 0 0 6px 0;" id="cfgAntiguedadInfo"></p>
+            <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 15px;" onclick="saveConfigForm()">Guardar datos</button>
+
+            <div class="config-section-title">Escala salarial (valor hora)</div>
+            <div class="escala-list" id="escalaListContainer"></div>
+            <div class="escala-form-grid">
+                <div>
+                    <label class="r-label">Mes</label>
+                    <input type="month" id="escMes" class="man-input" style="margin-top:4px;">
+                </div>
+                <div>
+                    <label class="r-label">Valor hora ($)</label>
+                    <input type="number" step="0.01" id="escHora" class="man-input" style="margin-top:4px;">
+                </div>
+                <div>
+                    <label class="r-label">Valor hora nocturno ($)</label>
+                    <input type="number" step="0.01" id="escNocturno" class="man-input" style="margin-top:4px;">
+                </div>
+                <div style="display:flex; align-items:flex-end;">
+                    <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 14px;" onclick="addOrUpdateEscalaMonth()">Guardar mes</button>
+                </div>
+            </div>
+            <p style="font-size: 11px; color: var(--secondary-text); margin: 0 0 15px 0;">* "Valor hora" = básico convencional + no remunerativo sumados (viene así en la escala del sindicato). Cuando salga una escala nueva, cargala acá.</p>
+
+            <div class="config-section-title">Backup de datos</div>
+            <p style="font-size: 12px; color: var(--secondary-text); margin: 0 0 8px 0;">Tus turnos viven en este navegador. Exportá un backup de vez en cuando para no perderlos.</p>
+            <div class="backup-row">
+                <button class="btn btn-history" style="margin-top:0;" onclick="exportBackup()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Exportar
+                </button>
+                <button class="btn btn-history" style="margin-top:0;" onclick="document.getElementById('importFileInput').click()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Importar
+                </button>
+            </div>
+            <input type="file" id="importFileInput" accept="application/json" style="display:none;" onchange="importBackup(event)">
         </div>
     </div>
 
@@ -233,12 +577,141 @@
         const statusMessage = document.getElementById('statusMessage');
         
         let currentDate = new Date();
-        let selectedModalDate = null; 
+        let selectedModalDate = null;
+
+        // --- TEMA (claro/oscuro) ---
+        const ICON_SOL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+        const ICON_LUNA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+
+        function estaEnModoOscuro() {
+            const elegido = document.documentElement.getAttribute('data-theme');
+            if (elegido === 'dark') return true;
+            if (elegido === 'light') return false;
+            return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        }
+
+        function actualizarIconoTema() {
+            const btn = document.getElementById('btnTheme');
+            if (btn) btn.innerHTML = estaEnModoOscuro() ? ICON_SOL : ICON_LUNA;
+        }
+
+        function toggleTheme() {
+            const nuevo = estaEnModoOscuro() ? 'light' : 'dark';
+            localStorage.setItem('theme', nuevo);
+            document.documentElement.setAttribute('data-theme', nuevo);
+            actualizarIconoTema();
+            vibrar(10);
+        }
+
+        // --- VIBRACIÓN SUTIL (si el dispositivo lo soporta; no hace nada si no) ---
+        function vibrar(ms) {
+            try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+        }
+
+        // --- TOAST: confirmaciones no invasivas, en vez de alert() ---
+        const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        let toastTimeoutId = null;
+        function mostrarToast(mensaje) {
+            let el = document.getElementById('appToast');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'appToast';
+                el.className = 'toast';
+                document.body.appendChild(el);
+            }
+            el.innerHTML = ICON_CHECK + '<span>' + mensaje + '</span>';
+            clearTimeout(toastTimeoutId);
+            el.classList.remove('show');
+            requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+            toastTimeoutId = setTimeout(() => el.classList.remove('show'), 2200);
+        }
+
+        // --- Animación de conteo para numeros (horas, sueldo) ---
+        function animarNumero(el, valorNuevo, formatFn) {
+            if (!el) return;
+            const valorActual = parseFloat(el.dataset.rawValue || '0') || 0;
+            if (Math.abs(valorNuevo - valorActual) < 0.005) {
+                el.textContent = formatFn(valorNuevo);
+                el.dataset.rawValue = valorNuevo;
+                return;
+            }
+            const inicio = performance.now();
+            const duracion = 450;
+            function paso(ahora) {
+                const t = Math.min((ahora - inicio) / duracion, 1);
+                const suavizado = 1 - Math.pow(1 - t, 3);
+                const valor = valorActual + (valorNuevo - valorActual) * suavizado;
+                el.textContent = formatFn(valor);
+                if (t < 1) requestAnimationFrame(paso);
+                else el.dataset.rawValue = valorNuevo;
+            }
+            requestAnimationFrame(paso);
+        }
 
         const feriadosArg = [
             '01-01', '02-16', '02-17', '03-24', '04-02', '04-03', '05-01', 
             '05-25', '06-17', '06-20', '07-09', '08-17', '10-12', '11-20', '12-08', '12-25'
         ];
+
+        // Escala salarial Convenio 329/2000 (Fed. Trabajadores Pasteleros) - Categoria Empleado B(30)
+        // "hora" = valor hora total (básico convencional + no remunerativo, ya sumados)
+        // "nocturno" = adicional Art. 54 total por hora trabajada 21hs-6hs (fijo + no remunerativo, ya sumados)
+        // Estos son los valores por defecto (los que trajo la escala del sindicato). Los meses que cargues
+        // vos desde Configuración > Escala salarial se guardan aparte y tienen prioridad sobre estos.
+        const escalaEmpleadoB = {
+            '2026-07': { hora: 6571.98, nocturno: 699.31 },
+            '2026-08': { hora: 6696.98, nocturno: 712.61 },
+            '2026-09': { hora: 6810.38, nocturno: 724.68 },
+            '2026-10': { hora: 6919.91, nocturno: 736.33 },
+            '2026-11': { hora: 6919.91, nocturno: 736.33 }
+        };
+
+        // --- CONFIGURACIÓN (datos personales, editables desde el modal de Configuración) ---
+        function getConfig() {
+            const saved = JSON.parse(localStorage.getItem('configApp')) || {};
+            return Object.assign({
+                hireDate: '2025-03-23',   // fecha de ingreso aproximada (~1 año y medio de antigüedad a set-2026)
+                entrenador: true,
+                entrenadorPct: 10,
+                presentismoPct: 14
+            }, saved);
+        }
+
+        function saveConfig(cfg) {
+            localStorage.setItem('configApp', JSON.stringify(cfg));
+        }
+
+        // Art. 51: adicional por antigüedad = 1% por año, se cobra recién a partir del mes en que se cumplen 2 años.
+        function computeAntiguedadPct(hireDateStr, atDate) {
+            if (!hireDateStr) return 0;
+            const hire = new Date(hireDateStr + 'T00:00:00');
+            const years = (atDate - hire) / (1000 * 60 * 60 * 24 * 365.25);
+            if (years < 2) return 0;
+            return Math.floor(years) * 0.01;
+        }
+
+        // Bono de fin de mes: presentismo + (entrenador, si corresponde)
+        function getBonoPct() {
+            const cfg = getConfig();
+            return (cfg.presentismoPct + (cfg.entrenador ? cfg.entrenadorPct : 0)) / 100;
+        }
+
+        function getEscalaCompleta() {
+            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            return Object.assign({}, escalaEmpleadoB, overrides);
+        }
+
+        function getRateForDate(dateObj) {
+            const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+            const escalaCompleta = getEscalaCompleta();
+            const mesesCargados = Object.keys(escalaCompleta).sort();
+            const escala = escalaCompleta[key] || escalaCompleta[mesesCargados[mesesCargados.length - 1]];
+            const cfg = getConfig();
+            const antiguedadPct = computeAntiguedadPct(cfg.hireDate, dateObj);
+            const horaBase = escala.hora * (1 + antiguedadPct);
+            const horaNocturno = escala.nocturno;
+            return { horaBase, horaNocturno };
+        }
 
         function getQuincenaKey(dateObj = new Date()) {
             const year = dateObj.getFullYear();
@@ -262,11 +735,12 @@
 
         function init() {
             updatePeriodoLabel();
-            
+            actualizarIconoTema();
+
             if (entryTime) {
                 btnIn.style.display = 'none';
                 btnOut.style.display = 'block';
-                statusMessage.innerText = `Trabajando desde las ${new Date(parseInt(entryTime)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                statusMessage.innerText = `Trabajando desde las ${new Date(parseInt(entryTime)).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false})}`;
                 statusMessage.style.color = 'var(--success)';
             }
             updateStats();
@@ -276,6 +750,8 @@
         function clockIn() {
             entryTime = Date.now();
             localStorage.setItem('entryTime', entryTime);
+            vibrar(10);
+            mostrarToast('Entrada marcada');
             init();
         }
 
@@ -284,19 +760,21 @@
             const exitTime = Date.now();
             const workedMs = exitTime - parseInt(entryTime);
             const workedHours = (workedMs / (1000 * 60 * 60)).toFixed(2);
-            
+
             saveShift(parseInt(entryTime), exitTime, parseFloat(workedHours));
-            
+
             localStorage.removeItem('entryTime');
             entryTime = null;
-            
+
             btnIn.style.display = 'block';
             btnOut.style.display = 'none';
             statusMessage.innerText = 'No estás trabajando';
             statusMessage.style.color = 'var(--text-color)';
-            
+
+            vibrar(10);
+            mostrarToast(`Turno guardado: ${workedHours}h`);
             updateStats();
-            renderCalendar(); 
+            renderCalendar();
         }
 
         function addModalShift() {
@@ -323,6 +801,8 @@
             const workedHours = (workedMs / (1000 * 60 * 60)).toFixed(2);
 
             saveShift(inTime, outTime, parseFloat(workedHours));
+            vibrar(10);
+            mostrarToast(`Turno guardado: ${workedHours}h`);
             updateStats();
             renderCalendar();
             return true;
@@ -342,6 +822,8 @@
                 let data = JSON.parse(localStorage.getItem('shiftsData'));
                 data[qKey].splice(shiftIndex, 1);
                 localStorage.setItem('shiftsData', JSON.stringify(data));
+                vibrar(15);
+                mostrarToast('Turno eliminado');
                 updateStats();
                 renderCalendar();
                 if(document.getElementById('dayModal').style.display === 'flex') {
@@ -354,14 +836,13 @@
             const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
             const shifts = data[qKey] || [];
             
-            const baseRate = 5229.46;
-            const nightRate = 500; 
-            
             let payBase = 0;
             let payNight = 0;
             let payFeriado = 0;
 
             shifts.forEach(shift => {
+                const { horaBase, horaNocturno } = getRateForDate(new Date(shift.in));
+
                 let nightMins = 0;
                 let currentMs = shift.in;
                 while(currentMs < shift.out) {
@@ -370,11 +851,13 @@
                     currentMs += 60000;
                 }
                 
-                payBase += shift.hours * baseRate;
-                payNight += (nightMins / 60) * nightRate;
+                payBase += shift.hours * horaBase;
+                payNight += (nightMins / 60) * horaNocturno;
                 
                 if (isHoliday(new Date(shift.in))) {
-                    payFeriado += shift.hours * baseRate; 
+                    const esDomingo = new Date(shift.in).getDay() === 0;
+                    const extra = esDomingo ? 1.5 : 1; // feriado: doble (base + 1x) | feriado que cae domingo: doble y medio (base + 1.5x)
+                    payFeriado += shift.hours * horaBase * extra;
                 }
             });
             
@@ -409,9 +892,9 @@
                 if (qKey.endsWith('Q2')) {
                     const q1Key = qKey.replace('Q2', 'Q1');
                     const pagosQ1 = calcularPagoQuincena(q1Key);
-                    const baseMesTotal = pagos.payBase + pagosQ1.payBase; 
-                    const bono24 = baseMesTotal * 0.24;
-                    sueldoBruto += bono24;
+                    const baseMesTotal = pagos.payBase + pagosQ1.payBase;
+                    const bono = baseMesTotal * getBonoPct();
+                    sueldoBruto += bono;
                 }
 
                 const realPay = realPayData[qKey] || 0;
@@ -423,7 +906,7 @@
                     const isDescuento = diff >= 0;
                     
                     diferenciaHtml = `
-                        <div style="margin-top: 12px; font-size: 13px; color: ${isDescuento ? 'var(--mcd-red)' : 'var(--success)'}; background: ${isDescuento ? '#ffeeed' : '#e6fce5'}; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600;">
+                        <div style="margin-top: 12px; font-size: 13px; color: ${isDescuento ? 'var(--mcd-red)' : 'var(--success)'}; background: ${isDescuento ? 'var(--tint-danger)' : 'var(--tint-success-strong)'}; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600;">
                             ${isDescuento ? 'Descuentos de ley aprox:' : 'Diferencia a favor:'} $${Math.abs(diff).toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (${perc}%)
                         </div>
                     `;
@@ -437,12 +920,12 @@
                     <div class="history-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <strong style="font-size: 16px;">${periodoNombre}</strong>
-                            <strong style="color: var(--success); font-size: 15px; background:#e6fce5; padding: 4px 8px; border-radius: 8px;">${totalHrs.toFixed(2)}h</strong>
+                            <strong style="color: var(--success); font-size: 15px; background: var(--tint-success-strong); padding: 4px 8px; border-radius: 8px;">${totalHrs.toFixed(2)}h</strong>
                         </div>
                         
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed var(--divider);">
                             <span style="font-size: 14px; font-weight: 600; color: var(--secondary-text);">Estimado (Bruto):</span>
-                            <strong style="font-size: 18px; color: #2b8a3e;">$${sueldoBruto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+                            <strong style="font-size: 18px; color: var(--money-color);">$${sueldoBruto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
                         </div>
 
                         <div>
@@ -489,12 +972,13 @@
             shiftsWithIndex.sort((a, b) => b.in - a.in).forEach(shift => {
                 totalHrs += shift.hours;
                 const inDate = new Date(shift.in);
-                const feriadoTag = isHoliday(inDate) ? `<div class="log-holiday">¡Feriado! (x2)</div>` : '';
+                const esFeriado = isHoliday(inDate);
+                const feriadoTag = esFeriado ? `<div class="log-holiday">¡Feriado! (${inDate.getDay() === 0 ? 'x2.5' : 'x2'})</div>` : '';
                 const dateStr = inDate.toLocaleDateString('es-ES', {weekday: 'short', day: '2-digit', month: 'short'});
-                const inStr = inDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                logList.innerHTML += `<li>
+                const inStr = inDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+                const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+
+                logList.innerHTML += `<li class="log-item ${esFeriado ? 'log-item-feriado' : ''}">
                     <div class="log-info">
                         <div class="log-date">${dateStr}</div>
                         <div class="log-time">${inStr} - ${outStr}</div>
@@ -511,31 +995,44 @@
                 logList.innerHTML = `<li style="justify-content:center; color:var(--secondary-text);">No hay turnos en esta quincena.</li>`;
             }
 
-            document.getElementById('totalHours').innerText = totalHrs.toFixed(2);
-            document.getElementById('totalShifts').innerText = shifts.length;
+            animarNumero(document.getElementById('totalHours'), totalHrs, v => v.toFixed(2));
+            animarNumero(document.getElementById('totalShifts'), shifts.length, v => Math.round(v).toString());
 
             const pagosActual = calcularPagoQuincena(quincena);
             let sueldoTotalBruto = pagosActual.payBase + pagosActual.payNight + pagosActual.payFeriado;
             let detalleBono = "";
 
+            const cfg = getConfig();
+            const antiguedadPctHoy = computeAntiguedadPct(cfg.hireDate, new Date());
+            const detalleAntiguedad = antiguedadPctHoy > 0
+                ? `<div style="margin-top: 4px;">+ ${(antiguedadPctHoy * 100).toFixed(0)}% Antigüedad (ya incluido en la base)</div>`
+                : '';
+
             if (quincena.endsWith('Q2')) {
                 const q1Key = quincena.replace('Q2', 'Q1');
                 const pagosQ1 = calcularPagoQuincena(q1Key);
-                
-                const baseMesTotal = pagosActual.payBase + pagosQ1.payBase; 
-                const bono24 = baseMesTotal * 0.24;
-                
-                sueldoTotalBruto += bono24;
-                detalleBono = `<div style="color: #2f9e44; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #b2f2bb;">+ 24% Mes (Presentismo y Entrenador): $${bono24.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+
+                const baseMesTotal = pagosActual.payBase + pagosQ1.payBase;
+                const bonoPct = getBonoPct();
+                const bono = baseMesTotal * bonoPct;
+
+                sueldoTotalBruto += bono;
+                const etiquetaBono = cfg.entrenador
+                    ? `Presentismo ${cfg.presentismoPct}% + Entrenador ${cfg.entrenadorPct}%`
+                    : `Presentismo ${cfg.presentismoPct}%`;
+                detalleBono = `<div style="color: var(--money-color); margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--tint-success-border);">+ ${(bonoPct * 100).toFixed(0)}% Mes (${etiquetaBono}): $${bono.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
             }
 
-            document.getElementById('sueldoEstimado').innerText = "$" + sueldoTotalBruto.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            
-            document.getElementById('sueldoDetalle').innerHTML = 
+            animarNumero(document.getElementById('sueldoEstimado'), sueldoTotalBruto, v => "$" + v.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+            document.getElementById('sueldoDetalle').innerHTML =
                 `Base Q actual: $${pagosActual.payBase.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
                  Nocturnidad Q actual: $${pagosActual.payNight.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
                  Feriados Q actual: $${pagosActual.payFeriado.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                 ${detalleAntiguedad}
                  ${detalleBono}`;
+
+            renderResumenMensual();
         }
 
         function changeMonth(direction) {
@@ -612,8 +1109,8 @@
                     const d = new Date(shift.in);
                     if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
                         hasShifts = true;
-                        const inStr = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const inStr = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+                        const outStr = new Date(shift.out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
                         
                         container.innerHTML += `
                             <div class="shift-item-modal">
@@ -639,12 +1136,229 @@
             document.getElementById('dayModal').style.display = 'none';
         }
 
+        // --- CONFIGURACIÓN: modal, formulario y escala salarial editable ---
+        function openConfigModal() {
+            const cfg = getConfig();
+            document.getElementById('cfgHireDate').value = cfg.hireDate || '';
+            document.getElementById('cfgEntrenador').checked = !!cfg.entrenador;
+            document.getElementById('cfgEntrenadorPct').value = cfg.entrenadorPct;
+            document.getElementById('cfgPresentismoPct').value = cfg.presentismoPct;
+
+            const antiguedadPctHoy = computeAntiguedadPct(cfg.hireDate, new Date());
+            document.getElementById('cfgAntiguedadInfo').innerText = antiguedadPctHoy > 0
+                ? `Antigüedad actual: ${(antiguedadPctHoy * 100).toFixed(0)}% (Art. 51, ya se aplica a la base).`
+                : `Antigüedad actual: 0% (el adicional recién arranca al cumplir 2 años en la empresa).`;
+
+            renderEscalaList();
+            document.getElementById('configModal').style.display = 'flex';
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        function saveConfigForm() {
+            const hireDate = document.getElementById('cfgHireDate').value;
+            const entrenador = document.getElementById('cfgEntrenador').checked;
+            const entrenadorPct = parseFloat(document.getElementById('cfgEntrenadorPct').value) || 0;
+            const presentismoPct = parseFloat(document.getElementById('cfgPresentismoPct').value) || 0;
+
+            saveConfig({ hireDate, entrenador, entrenadorPct, presentismoPct });
+
+            const antiguedadPctHoy = computeAntiguedadPct(hireDate, new Date());
+            document.getElementById('cfgAntiguedadInfo').innerText = antiguedadPctHoy > 0
+                ? `Antigüedad actual: ${(antiguedadPctHoy * 100).toFixed(0)}% (Art. 51, ya se aplica a la base).`
+                : `Antigüedad actual: 0% (el adicional recién arranca al cumplir 2 años en la empresa).`;
+
+            vibrar(10);
+            mostrarToast('Configuración guardada');
+            updateStats();
+        }
+
+        function renderEscalaList() {
+            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            const completa = getEscalaCompleta();
+            const meses = Object.keys(completa).sort();
+            const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+            const container = document.getElementById('escalaListContainer');
+            container.innerHTML = meses.map(key => {
+                const [y, m] = key.split('-');
+                const nombre = `${monthNames[parseInt(m) - 1]} ${y}`;
+                const esOverride = overrides.hasOwnProperty(key);
+                const borrar = esOverride ? `<button class="escala-del" onclick="deleteEscalaOverride('${key}')" title="Volver al valor por defecto">×</button>` : '';
+                return `<div class="escala-list-item ${esOverride ? 'overridden' : ''}">
+                    <span class="escala-mes">${nombre}</span>
+                    <span class="escala-valores">$${completa[key].hora.toLocaleString('es-AR', {maximumFractionDigits: 2})}/h · noct. $${completa[key].nocturno.toLocaleString('es-AR', {maximumFractionDigits: 2})}${borrar}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function addOrUpdateEscalaMonth() {
+            const mesVal = document.getElementById('escMes').value; // formato YYYY-MM
+            const hora = parseFloat(document.getElementById('escHora').value);
+            const nocturno = parseFloat(document.getElementById('escNocturno').value);
+
+            if (!mesVal || isNaN(hora) || isNaN(nocturno)) {
+                alert('Completá el mes, el valor hora y el valor hora nocturno.');
+                return;
+            }
+
+            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            overrides[mesVal] = { hora, nocturno };
+            localStorage.setItem('escalaOverrides', JSON.stringify(overrides));
+
+            document.getElementById('escMes').value = '';
+            document.getElementById('escHora').value = '';
+            document.getElementById('escNocturno').value = '';
+
+            vibrar(10);
+            mostrarToast('Mes de escala guardado');
+            renderEscalaList();
+            updateStats();
+        }
+
+        function deleteEscalaOverride(key) {
+            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            delete overrides[key];
+            localStorage.setItem('escalaOverrides', JSON.stringify(overrides));
+            renderEscalaList();
+            updateStats();
+        }
+
+        // --- BACKUP: exportar e importar datos ---
+        function exportBackup() {
+            const backup = {
+                exportadoEl: new Date().toISOString(),
+                shiftsData: JSON.parse(localStorage.getItem('shiftsData')) || {},
+                realPayData: JSON.parse(localStorage.getItem('realPayData')) || {},
+                configApp: getConfig(),
+                escalaOverrides: JSON.parse(localStorage.getItem('escalaOverrides')) || {}
+            };
+
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const fecha = new Date().toISOString().slice(0, 10);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mis-horas-backup-${fecha}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            vibrar(10);
+            mostrarToast('Backup exportado');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let backup;
+                try {
+                    backup = JSON.parse(e.target.result);
+                } catch (err) {
+                    alert('El archivo no es un backup válido.');
+                    return;
+                }
+
+                if (!backup.shiftsData) {
+                    alert('El archivo no es un backup válido.');
+                    return;
+                }
+
+                if (!confirm('Esto reemplaza los turnos y la configuración que tenés cargados ahora por los del backup. ¿Continuar?')) {
+                    return;
+                }
+
+                localStorage.setItem('shiftsData', JSON.stringify(backup.shiftsData || {}));
+                localStorage.setItem('realPayData', JSON.stringify(backup.realPayData || {}));
+                localStorage.setItem('escalaOverrides', JSON.stringify(backup.escalaOverrides || {}));
+                if (backup.configApp) saveConfig(backup.configApp);
+
+                init();
+                closeConfigModal();
+                vibrar(15);
+                mostrarToast('Backup importado correctamente');
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // --- RESUMEN MENSUAL ---
+        function getMesesConDatos() {
+            const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            const meses = new Set();
+            Object.keys(data).forEach(qKey => {
+                const [y, m] = qKey.split('-');
+                meses.add(`${y}-${m}`);
+            });
+            return Array.from(meses).sort();
+        }
+
+        function calcularSueldoMes(mesKey) {
+            const pagosQ1 = calcularPagoQuincena(`${mesKey}-Q1`);
+            const pagosQ2 = calcularPagoQuincena(`${mesKey}-Q2`);
+
+            let horas = 0;
+            const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            (data[`${mesKey}-Q1`] || []).forEach(s => horas += s.hours);
+            (data[`${mesKey}-Q2`] || []).forEach(s => horas += s.hours);
+
+            const baseMesTotal = pagosQ1.payBase + pagosQ2.payBase;
+            const bono = baseMesTotal * getBonoPct();
+
+            const sueldo = pagosQ1.payBase + pagosQ1.payNight + pagosQ1.payFeriado
+                + pagosQ2.payBase + pagosQ2.payNight + pagosQ2.payFeriado
+                + bono;
+
+            return { horas, sueldo };
+        }
+
+        function renderResumenMensual() {
+            const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+            const meses = getMesesConDatos().slice(-6);
+            const container = document.getElementById('resumenMensualChart');
+
+            if (meses.length === 0) {
+                container.innerHTML = `<p class="empty-hint">Todavía no hay turnos suficientes para armar el resumen mensual.</p>`;
+                return;
+            }
+
+            const datos = meses.map(mesKey => {
+                const [y, m] = mesKey.split('-');
+                const { horas, sueldo } = calcularSueldoMes(mesKey);
+                return { label: `${monthNames[parseInt(m) - 1]} ${y.slice(2)}`, horas, sueldo };
+            });
+
+            const maxHoras = Math.max(...datos.map(d => d.horas), 1);
+
+            container.innerHTML = datos.map(d => `
+                <div class="mes-bar-row">
+                    <div class="mes-bar-label">${d.label}</div>
+                    <div class="mes-bar-track"><div class="mes-bar-fill" data-ancho="${Math.max((d.horas / maxHoras) * 100, 4)}" style="width: 0%;"></div></div>
+                    <div class="mes-bar-value"><strong>${d.horas.toFixed(1)}h</strong> · $${d.sueldo.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
+                </div>
+            `).join('');
+
+            // Anima las barras creciendo desde 0 hasta su ancho final (en vez de aparecer ya "llenas")
+            requestAnimationFrame(() => {
+                container.querySelectorAll('.mes-bar-fill').forEach(el => {
+                    el.style.width = el.dataset.ancho + '%';
+                });
+            });
+        }
+
         // Cierra los modales si tocás la pantalla gris por fuera
         window.onclick = function(event) {
             const dayModal = document.getElementById('dayModal');
             const historyModal = document.getElementById('historyModal');
+            const configModal = document.getElementById('configModal');
             if (event.target == dayModal) closeModal();
             if (event.target == historyModal) closeHistoryModal();
+            if (event.target == configModal) closeConfigModal();
         }
 
         init();
