@@ -454,7 +454,14 @@
             <div class="r-value" id="sueldoEstimado" style="color: var(--money-color); font-size: 30px; margin-bottom: 6px;">$0.00</div>
             <div id="sueldoDetalle" style="font-size: 13px; color: var(--money-color); opacity: 0.85; line-height: 1.5; font-weight: 500;">
                 </div>
-            <p style="font-size: 11px; color: var(--secondary-text); margin-top: 10px; margin-bottom: 0;">* Estimación en bruto. No incluye descuentos de ley.</p>
+
+            <div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--tint-success-border);">
+                <div style="font-size: 11px; font-weight: 700; color: var(--secondary-text); text-transform: uppercase; letter-spacing: 0.5px;">Estimado en mano (Neto)</div>
+                <div class="r-value" id="sueldoNetoEstimado" style="color: var(--text-color); font-size: 22px; margin-top: 4px;">$0.00</div>
+                <p id="sueldoNetoNota" style="font-size: 11px; color: var(--secondary-text); margin: 4px 0 0 0;"></p>
+            </div>
+
+            <p style="font-size: 11px; color: var(--secondary-text); margin-top: 10px; margin-bottom: 0;">* Estimaciones. El bruto no incluye descuentos de ley; el neto es aproximado.</p>
         </div>
     </div>
 
@@ -511,7 +518,15 @@
             <span class="close-modal" onclick="closeConfigModal()">×</span>
             <h3 class="modal-title" style="border-bottom: 1px solid var(--divider);">Configuración</h3>
 
-            <div class="config-section-title">Tus datos (Empleado B)</div>
+            <div class="config-section-title" id="cfgDatosTitle">Tus datos</div>
+            <div class="config-row">
+                <label class="r-label">Categoría (convenio)</label>
+                <select id="cfgCategoria" class="man-input" style="margin-top:4px;" onchange="onCategoriaSelectChange()">
+                    <option value="A">Empleado A</option>
+                    <option value="B">Empleado B</option>
+                    <option value="PIL">PIL (Principiante)</option>
+                </select>
+            </div>
             <div class="config-row">
                 <label>Fecha de ingreso (para calcular antigüedad)</label>
                 <input type="date" id="cfgHireDate" class="man-input" style="margin-top:0;">
@@ -531,9 +546,16 @@
                 </div>
             </div>
             <p style="font-size: 11px; color: var(--secondary-text); margin: 0 0 6px 0;" id="cfgAntiguedadInfo"></p>
+
+            <div class="config-row">
+                <label class="r-label">Descuento estimado para el neto (%)</label>
+                <input type="number" step="0.1" id="cfgDescuentoPct" class="man-input" style="margin-top:4px;">
+            </div>
+            <p style="font-size: 11px; color: var(--secondary-text); margin: 0 0 10px 0;">Aproxima jubilación + obra social + sindicato. Si cargás cobros reales en "Historial de Quincenas", la app usa ese promedio real en vez de este número.</p>
+
             <button class="btn btn-in" style="margin-bottom: 0; padding: 12px; font-size: 15px;" onclick="saveConfigForm()">Guardar datos</button>
 
-            <div class="config-section-title">Escala salarial (valor hora)</div>
+            <div class="config-section-title" id="escalaSectionTitle">Escala salarial (valor hora)</div>
             <div class="escala-list" id="escalaListContainer"></div>
             <div class="escala-form-grid">
                 <div>
@@ -656,8 +678,9 @@
         // Escala salarial Convenio 329/2000 (Fed. Trabajadores Pasteleros) - Categoria Empleado B(30)
         // "hora" = valor hora total (básico convencional + no remunerativo, ya sumados)
         // "nocturno" = adicional Art. 54 total por hora trabajada 21hs-6hs (fijo + no remunerativo, ya sumados)
-        // Estos son los valores por defecto (los que trajo la escala del sindicato). Los meses que cargues
-        // vos desde Configuración > Escala salarial se guardan aparte y tienen prioridad sobre estos.
+        // Estos son los valores por defecto (los que trajo la escala del sindicato) para la categoría B.
+        // Para "Empleado A" y "PIL" no tenemos una escala oficial cargada de fábrica: se cargan a mano
+        // desde Configuración > Escala salarial (por categoría), igual que los meses nuevos de B.
         const escalaEmpleadoB = {
             '2026-07': { hora: 6571.98, nocturno: 699.31 },
             '2026-08': { hora: 6696.98, nocturno: 712.61 },
@@ -666,14 +689,33 @@
             '2026-11': { hora: 6919.91, nocturno: 736.33 }
         };
 
+        const CATEGORIAS = { A: 'Empleado A', B: 'Empleado B', PIL: 'PIL (Principiante)' };
+
+        // Las escalas "de fábrica" (sin que el usuario haya cargado nada) sólo existen para B,
+        // que es la que viene con datos reales del sindicato.
+        const escalasDeFabrica = { B: escalaEmpleadoB };
+
+        // Antes de esta versión, "escalaOverrides" era un objeto plano { "2026-07": {...} } (una sola
+        // categoría, B). Ahora es { "B": { "2026-07": {...} }, "A": {...}, "PIL": {...} }. Esta función
+        // migra el formato viejo la primera vez que se carga, sin pedirle nada al usuario.
+        function migrarEscalaOverrides() {
+            const raw = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            const esFormatoViejo = Object.keys(raw).some(k => /^\d{4}-\d{2}$/.test(k));
+            if (esFormatoViejo) {
+                localStorage.setItem('escalaOverrides', JSON.stringify({ B: raw }));
+            }
+        }
+
         // --- CONFIGURACIÓN (datos personales, editables desde el modal de Configuración) ---
         function getConfig() {
             const saved = JSON.parse(localStorage.getItem('configApp')) || {};
             return Object.assign({
+                categoria: 'B',           // 'A' | 'B' | 'PIL'
                 hireDate: '2025-03-23',   // fecha de ingreso aproximada (~1 año y medio de antigüedad a set-2026)
                 entrenador: true,
                 entrenadorPct: 10,
-                presentismoPct: 14
+                presentismoPct: 14,
+                descuentoPct: 21.3   // aportes (jubilación + obra social + sindicato), calibrado con un recibo real
             }, saved);
         }
 
@@ -696,15 +738,54 @@
             return (cfg.presentismoPct + (cfg.entrenador ? cfg.entrenadorPct : 0)) / 100;
         }
 
-        function getEscalaCompleta() {
-            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
-            return Object.assign({}, escalaEmpleadoB, overrides);
+        // % de descuento a usar para estimar el neto: si ya cargaste cobros reales en el
+        // Historial de Quincenas, usamos el promedio real observado (más preciso). Si no,
+        // usamos el % configurado a mano (por defecto, calibrado con un recibo real).
+        function getDescuentoEstimado(cfg) {
+            const data = JSON.parse(localStorage.getItem('shiftsData')) || {};
+            const realPayData = JSON.parse(localStorage.getItem('realPayData')) || {};
+            const muestras = [];
+
+            Object.keys(realPayData).forEach(qKey => {
+                const realPay = realPayData[qKey];
+                const shifts = data[qKey] || [];
+                if (!(realPay > 0) || shifts.length === 0) return;
+
+                const pagos = calcularPagoQuincena(qKey);
+                let bruto = pagos.payBase + pagos.payNight + pagos.payFeriado;
+                if (qKey.endsWith('Q2')) {
+                    const pagosQ1 = calcularPagoQuincena(qKey.replace('Q2', 'Q1'));
+                    bruto += (pagos.payBase + pagosQ1.payBase) * getBonoPct();
+                }
+                if (bruto <= 0) return;
+
+                const pct = ((bruto - realPay) / bruto) * 100;
+                if (pct >= 0 && pct <= 60) muestras.push(pct); // descarta datos raros/incompletos
+            });
+
+            if (muestras.length > 0) {
+                const promedio = muestras.reduce((a, b) => a + b, 0) / muestras.length;
+                return { pct: promedio, fuente: 'real', n: muestras.length };
+            }
+            return { pct: cfg.descuentoPct || 0, fuente: 'config' };
+        }
+
+        function getEscalaCompleta(categoria) {
+            categoria = categoria || getConfig().categoria;
+            const overridesTodas = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            const base = escalasDeFabrica[categoria] || {};
+            const overridesCategoria = overridesTodas[categoria] || {};
+            return Object.assign({}, base, overridesCategoria);
         }
 
         function getRateForDate(dateObj) {
             const key = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
             const escalaCompleta = getEscalaCompleta();
             const mesesCargados = Object.keys(escalaCompleta).sort();
+            if (mesesCargados.length === 0) {
+                // Categoría nueva (ej. recién elegiste "A" o "PIL") sin ninguna escala cargada todavía.
+                return { horaBase: 0, horaNocturno: 0 };
+            }
             const escala = escalaCompleta[key] || escalaCompleta[mesesCargados[mesesCargados.length - 1]];
             const cfg = getConfig();
             const antiguedadPct = computeAntiguedadPct(cfg.hireDate, dateObj);
@@ -734,6 +815,7 @@
         }
 
         function init() {
+            migrarEscalaOverrides();
             updatePeriodoLabel();
             actualizarIconoTema();
 
@@ -1025,6 +1107,13 @@
 
             animarNumero(document.getElementById('sueldoEstimado'), sueldoTotalBruto, v => "$" + v.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
 
+            const descInfo = getDescuentoEstimado(cfg);
+            const sueldoNeto = sueldoTotalBruto * (1 - descInfo.pct / 100);
+            animarNumero(document.getElementById('sueldoNetoEstimado'), sueldoNeto, v => "$" + v.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            document.getElementById('sueldoNetoNota').textContent = descInfo.fuente === 'real'
+                ? `Aprox. ${descInfo.pct.toFixed(1)}% de descuento, según el promedio de ${descInfo.n} quincena${descInfo.n === 1 ? '' : 's'} real${descInfo.n === 1 ? '' : 'es'} que cargaste.`
+                : `Aprox. ${descInfo.pct.toFixed(1)}% de descuento (jubilación + obra social + sindicato). Ajustalo en Configuración.`;
+
             document.getElementById('sueldoDetalle').innerHTML =
                 `Base Q actual: $${pagosActual.payBase.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
                  Nocturnidad Q actual: $${pagosActual.payNight.toLocaleString('es-AR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
@@ -1137,12 +1226,25 @@
         }
 
         // --- CONFIGURACIÓN: modal, formulario y escala salarial editable ---
+        function actualizarTituloDatos(categoria) {
+            const el = document.getElementById('cfgDatosTitle');
+            if (el) el.textContent = `Tus datos (${CATEGORIAS[categoria] || categoria})`;
+        }
+
+        function onCategoriaSelectChange() {
+            actualizarTituloDatos(getCategoriaEnModal());
+            renderEscalaList();
+        }
+
         function openConfigModal() {
             const cfg = getConfig();
+            document.getElementById('cfgCategoria').value = cfg.categoria || 'B';
             document.getElementById('cfgHireDate').value = cfg.hireDate || '';
             document.getElementById('cfgEntrenador').checked = !!cfg.entrenador;
             document.getElementById('cfgEntrenadorPct').value = cfg.entrenadorPct;
             document.getElementById('cfgPresentismoPct').value = cfg.presentismoPct;
+            document.getElementById('cfgDescuentoPct').value = cfg.descuentoPct;
+            actualizarTituloDatos(cfg.categoria || 'B');
 
             const antiguedadPctHoy = computeAntiguedadPct(cfg.hireDate, new Date());
             document.getElementById('cfgAntiguedadInfo').innerText = antiguedadPctHoy > 0
@@ -1158,12 +1260,15 @@
         }
 
         function saveConfigForm() {
+            const categoria = document.getElementById('cfgCategoria').value;
             const hireDate = document.getElementById('cfgHireDate').value;
             const entrenador = document.getElementById('cfgEntrenador').checked;
             const entrenadorPct = parseFloat(document.getElementById('cfgEntrenadorPct').value) || 0;
             const presentismoPct = parseFloat(document.getElementById('cfgPresentismoPct').value) || 0;
+            const descuentoPct = parseFloat(document.getElementById('cfgDescuentoPct').value) || 0;
 
-            saveConfig({ hireDate, entrenador, entrenadorPct, presentismoPct });
+            saveConfig({ categoria, hireDate, entrenador, entrenadorPct, presentismoPct, descuentoPct });
+            actualizarTituloDatos(categoria);
 
             const antiguedadPctHoy = computeAntiguedadPct(hireDate, new Date());
             document.getElementById('cfgAntiguedadInfo').innerText = antiguedadPctHoy > 0
@@ -1175,17 +1280,33 @@
             updateStats();
         }
 
+        // Categoría que se está viendo/editando AHORA MISMO en el modal de Configuración (el selector),
+        // que puede no coincidir todavía con la guardada si el usuario la cambió pero no tocó "Guardar datos".
+        function getCategoriaEnModal() {
+            const el = document.getElementById('cfgCategoria');
+            return el && el.value ? el.value : getConfig().categoria;
+        }
+
         function renderEscalaList() {
-            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
-            const completa = getEscalaCompleta();
+            const categoria = getCategoriaEnModal();
+            const overridesTodas = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            const overridesCategoria = overridesTodas[categoria] || {};
+            const completa = getEscalaCompleta(categoria);
             const meses = Object.keys(completa).sort();
             const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
+            const tituloEl = document.getElementById('escalaSectionTitle');
+            if (tituloEl) tituloEl.textContent = `Escala salarial (valor hora) — ${CATEGORIAS[categoria] || categoria}`;
+
             const container = document.getElementById('escalaListContainer');
+            if (meses.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: var(--secondary-text); margin: 0; padding: 14px;">Todavía no cargaste ninguna escala para ${CATEGORIAS[categoria] || categoria}. Agregá el primer mes abajo.</p>`;
+                return;
+            }
             container.innerHTML = meses.map(key => {
                 const [y, m] = key.split('-');
                 const nombre = `${monthNames[parseInt(m) - 1]} ${y}`;
-                const esOverride = overrides.hasOwnProperty(key);
+                const esOverride = overridesCategoria.hasOwnProperty(key);
                 const borrar = esOverride ? `<button class="escala-del" onclick="deleteEscalaOverride('${key}')" title="Volver al valor por defecto">×</button>` : '';
                 return `<div class="escala-list-item ${esOverride ? 'overridden' : ''}">
                     <span class="escala-mes">${nombre}</span>
@@ -1204,9 +1325,11 @@
                 return;
             }
 
-            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
-            overrides[mesVal] = { hora, nocturno };
-            localStorage.setItem('escalaOverrides', JSON.stringify(overrides));
+            const categoria = getCategoriaEnModal();
+            const overridesTodas = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            overridesTodas[categoria] = overridesTodas[categoria] || {};
+            overridesTodas[categoria][mesVal] = { hora, nocturno };
+            localStorage.setItem('escalaOverrides', JSON.stringify(overridesTodas));
 
             document.getElementById('escMes').value = '';
             document.getElementById('escHora').value = '';
@@ -1219,9 +1342,10 @@
         }
 
         function deleteEscalaOverride(key) {
-            const overrides = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
-            delete overrides[key];
-            localStorage.setItem('escalaOverrides', JSON.stringify(overrides));
+            const categoria = getCategoriaEnModal();
+            const overridesTodas = JSON.parse(localStorage.getItem('escalaOverrides')) || {};
+            if (overridesTodas[categoria]) delete overridesTodas[categoria][key];
+            localStorage.setItem('escalaOverrides', JSON.stringify(overridesTodas));
             renderEscalaList();
             updateStats();
         }
